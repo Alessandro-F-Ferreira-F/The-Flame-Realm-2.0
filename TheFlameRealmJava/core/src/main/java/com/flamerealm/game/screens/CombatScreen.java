@@ -68,6 +68,74 @@ public class CombatScreen extends BaseScreen {
     }
 
     @Override
+    protected boolean update(float delta) {
+        if (usedFuryOfTheEye && !instances.furyOfTheEye.getIsOver()) {
+            instances.furyOfTheEye.update();
+        }
+
+        if (elapsedSinceLastClick > WAIT_TIME) {
+            turnoAtual = Turn.PLAYER;
+            enemyLastAtk = null;
+
+            if (instances.playerCombatForm.getHealthPoints() == 0) {
+                instances.playerCombatForm.revive(GameConstants.playerHp);
+                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
+
+                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
+                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
+
+                instances.theadDarkus.revive(GameConstants.theadDarkusHp);
+                instances.theadDarkusHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
+
+                instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
+                game.setScreen(game.death);
+                return true;
+            }
+        }
+
+        if (playerLastAtk != null) {
+            if (!playerLastAtk.getIsOver()) {
+                playerLastAtk.update();
+            } else if (instances.theadDarkus.getHealthPoints() == 0) {
+                turnoAtual = Turn.PLAYER;
+                instances.playerCombatForm.revive(GameConstants.playerHp);
+                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
+
+                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
+                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
+
+                instances.theadDarkus.revive(GameConstants.theadDarkusHp);
+                instances.theadDarkusHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
+
+                instances.gameMap.disableCurrentPoint();
+                instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
+                game.setScreen(game.play);
+                return true;
+            }
+        }
+
+        if (turnoAtual == Turn.ENEMY && elapsedSinceLastClick >= WAIT_TIME / 2f && elapsedSinceLastClick <= WAIT_TIME) {
+            if (enemyLastAtk == null) {
+                enemyLastAtk = instances.theadDarkus.randomizeAtk();
+                enemyLastAtk.randomizeHitKill();
+                enemyLastAtk.setIsOver(false);
+
+                instances.playerCombatForm.setHealthPoints(instances.playerCombatForm.getHealthPoints() - enemyLastAtk.getDamage());
+                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
+            }
+
+            if (!enemyLastAtk.getIsOver()) {
+                enemyLastAtk.update();
+            }
+        }
+
+        instances.theadDarkus.update();
+        instances.playerCombatForm.update();
+
+        return false;
+    }
+
+    @Override
     protected void draw(float delta) {
         instances.secretEyeButton.draw(batch);
 
@@ -102,66 +170,15 @@ public class CombatScreen extends BaseScreen {
 
         if (usedFuryOfTheEye && !instances.furyOfTheEye.getIsOver()) {
             batch.draw(instances.furyOfTheEye.getImage(), instances.furyOfTheEye.getPosition().x, instances.furyOfTheEye.getPosition().y);
-            instances.furyOfTheEye.update();
         }
 
-        if (elapsedSinceLastClick > WAIT_TIME) {
-            turnoAtual = Turn.PLAYER;
-            enemyLastAtk = null;
-
-            if (instances.playerCombatForm.getHealthPoints() == 0) {
-                instances.playerCombatForm.revive(GameConstants.playerHp);
-                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
-
-                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
-                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
-
-                instances.theadDarkus.revive(GameConstants.theadDarkusHp);
-                instances.theadDarkusHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
-
-                instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
-                game.setScreen(game.death);
-            }
+        if (playerLastAtk != null && !playerLastAtk.getIsOver()) {
+            batch.draw(playerLastAtk.getImage(), playerLastAtk.getPosition().x, playerLastAtk.getPosition().y);
         }
 
-        if (playerLastAtk != null) {
-            if (!playerLastAtk.getIsOver()) {
-                batch.draw(playerLastAtk.getImage(), playerLastAtk.getPosition().x, playerLastAtk.getPosition().y);
-                playerLastAtk.update();
-            } else if (instances.theadDarkus.getHealthPoints() == 0) {
-                turnoAtual = Turn.PLAYER;
-                instances.playerCombatForm.revive(GameConstants.playerHp);
-                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
-
-                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
-                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
-
-                instances.theadDarkus.revive(GameConstants.theadDarkusHp);
-                instances.theadDarkusHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
-
-                instances.gameMap.disableCurrentPoint();
-                instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
-                game.setScreen(game.play);
-            }
+        if (turnoAtual == Turn.ENEMY && elapsedSinceLastClick >= WAIT_TIME / 2f && elapsedSinceLastClick <= WAIT_TIME
+                && enemyLastAtk != null && !enemyLastAtk.getIsOver()) {
+            batch.draw(enemyLastAtk.getImage(), enemyLastAtk.getPosition().x, enemyLastAtk.getPosition().y);
         }
-
-        if (turnoAtual == Turn.ENEMY && elapsedSinceLastClick >= WAIT_TIME / 2f && elapsedSinceLastClick <= WAIT_TIME) {
-            if (enemyLastAtk == null) {
-                enemyLastAtk = instances.theadDarkus.randomizeAtk();
-                enemyLastAtk.randomizeHitKill();
-                enemyLastAtk.setIsOver(false);
-
-                instances.playerCombatForm.setHealthPoints(instances.playerCombatForm.getHealthPoints() - enemyLastAtk.getDamage());
-                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
-            }
-
-            if (!enemyLastAtk.getIsOver()) {
-                batch.draw(enemyLastAtk.getImage(), enemyLastAtk.getPosition().x, enemyLastAtk.getPosition().y);
-                enemyLastAtk.update();
-            }
-        }
-
-        instances.theadDarkus.update();
-        instances.playerCombatForm.update();
     }
 }

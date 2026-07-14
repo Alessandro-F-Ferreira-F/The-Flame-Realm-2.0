@@ -26,6 +26,9 @@ public abstract class BaseScreen implements Screen {
         if (handleInput()) {   // se trocou de tela, aborta: nao desenha a tela velha por cima da nova
             return;
         }
+        if (update(delta)) {   // se trocou de tela, aborta: nao desenha a tela velha por cima da nova
+            return;
+        }
         batch.begin();
         batch.setColor(Color.WHITE);
         draw(delta);
@@ -38,6 +41,15 @@ public abstract class BaseScreen implements Screen {
      * Hook com default vazio: telas sem input proprio nao precisam sobrescrever.
      */
     protected boolean handleInput() {
+        return false;
+    }
+
+    /**
+     * Passo variavel: faz o mundo avancar (logica), sem tocar no SpriteBatch.
+     * @return true se game.setScreen foi chamado (frame deve ser abortado).
+     * Hook com default vazio: telas sem logica propria nao precisam sobrescrever.
+     */
+    protected boolean update(float delta) {
         return false;
     }
 
