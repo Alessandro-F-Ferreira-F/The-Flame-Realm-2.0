@@ -1,0 +1,4 @@
+rootProject.name = 'TheFlameRealmJava'
+
+include 'core'
+include 'desktop'

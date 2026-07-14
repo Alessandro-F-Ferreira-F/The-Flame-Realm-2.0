@@ -1,0 +1,52 @@
+# Gradle
+.gradle/
+build/
+**/build/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Java
+*.class
+*.log
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+hs_err_pid*
+
+# libGDX
+bin/
+gwt-unitCache/
+saves/
+.prefs/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# NetBeans
+nbproject/private/
+nbproject/Package-*.bam
+build.xml
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+*~
