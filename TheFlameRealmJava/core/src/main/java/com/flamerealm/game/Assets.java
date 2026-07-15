@@ -83,6 +83,16 @@ public class Assets implements Disposable {
         }
     }
 
+    /** Descarrega uma lista de descriptors (nao bloqueia; contagem de referencias
+     * do AssetManager cuida de assets compartilhados entre grupos). */
+    public void unload(Array<AssetDescriptor<?>> descriptors) {
+        for (AssetDescriptor<?> d : descriptors) {
+            if (assetManager.isLoaded(d.fileName)) {
+                assetManager.unload(d.fileName);
+            }
+        }
+    }
+
     /** Chamado 1x por frame pela BootLoadingScreen. true = fila vazia. */
     public boolean updateLoading() {
         return assetManager.update();

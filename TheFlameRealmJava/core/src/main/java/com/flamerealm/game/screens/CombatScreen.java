@@ -91,10 +91,12 @@ public class CombatScreen extends BaseScreen {
                 instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
                 instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
 
-                encounter.boss.revive(GameConstants.theadDarkusHp);
-                encounter.bossHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
+                encounter.boss.revive(encounter.maxHp);
+                encounter.bossHpText.setMessage("HP: " + encounter.maxHp);
 
                 instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
+                assets.unload(encounter.descriptors);
+                encounter = null;
                 game.setScreen(game.death);
                 return true;
             }
@@ -111,11 +113,13 @@ public class CombatScreen extends BaseScreen {
                 instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
                 instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
 
-                encounter.boss.revive(GameConstants.theadDarkusHp);
-                encounter.bossHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
+                encounter.boss.revive(encounter.maxHp);
+                encounter.bossHpText.setMessage("HP: " + encounter.maxHp);
 
                 instances.gameMap.disableCurrentPoint();
                 instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
+                assets.unload(encounter.descriptors);
+                encounter = null;
                 game.setScreen(game.play);
                 return true;
             }

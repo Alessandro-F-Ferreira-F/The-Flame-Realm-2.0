@@ -20,8 +20,8 @@ public class GameMap {
 
     public GameMap(Texture image, List<FightPoint> fightPoints, float pointDistTollerance) {
         FightPoint first = fightPoints.get(0);
-        this.currentPoint = new FightPoint(new Vector2(first.getPoint()), first.getAllowedDirections(), first.getActivated());
-        this.previousPoint = new FightPoint(new Vector2(first.getPoint()), first.getAllowedDirections(), first.getActivated());
+        this.currentPoint = new FightPoint(new Vector2(first.getPoint()), first.getAllowedDirections(), first.getActivated(), first.getManifest());
+        this.previousPoint = new FightPoint(new Vector2(first.getPoint()), first.getAllowedDirections(), first.getActivated(), first.getManifest());
         this.image = image;
         this.fightPoints = fightPoints;
         this.tol = pointDistTollerance;
@@ -40,6 +40,7 @@ public class GameMap {
             getCurrentPoint().setPoint(point.getPoint());
             getCurrentPoint().setAllowedDirections(point.getAllowedDirections());
             getCurrentPoint().setActivated(point.getActivated());
+            getCurrentPoint().setManifest(point.getManifest());
         }
         return test;
     }
@@ -70,6 +71,7 @@ public class GameMap {
         getCurrentPoint().setPoint(point.getPoint());
         getCurrentPoint().setAllowedDirections(point.getAllowedDirections());
         getCurrentPoint().setActivated(point.getActivated());
+        getCurrentPoint().setManifest(point.getManifest());
     }
 
     public Texture getImage() {
@@ -100,5 +102,6 @@ public class GameMap {
         getPreviousPoint().setPoint(point.getPoint());
         getPreviousPoint().setAllowedDirections(point.getAllowedDirections());
         getPreviousPoint().setActivated(point.getActivated());
+        getPreviousPoint().setManifest(point.getManifest());
     }
 }

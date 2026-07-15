@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.Assets;
+import com.flamerealm.game.assets.TheadDarkusManifest;
 import com.flamerealm.game.attacks.Attack;
 import com.flamerealm.game.attacks.PlayerAttack;
 import com.flamerealm.game.characters.CharacterEntity;
@@ -269,11 +270,12 @@ public class GameInstances {
         // 5 - Game map
         gameMapImage = assets.texture("Images/Gamemaps/GameMap.png");
 
-        startPoint = new FightPoint(new Vector2(downPoint), Arrays.asList("UP"), false);
-        centralFightPoint = new FightPoint(new Vector2(centralPoint), Arrays.asList("UP", "DOWN", "LEFT", "RIGHT"));
-        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"));
-        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"));
-        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"));
+        startPoint = new FightPoint(new Vector2(downPoint), Arrays.asList("UP"), false, null);
+        centralFightPoint = new FightPoint(new Vector2(centralPoint), Arrays.asList("UP", "DOWN", "LEFT", "RIGHT"),
+                true, TheadDarkusManifest.INSTANCE);
+        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, TheadDarkusManifest.INSTANCE);
+        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, TheadDarkusManifest.INSTANCE);
+        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, TheadDarkusManifest.INSTANCE);
 
         List<FightPoint> gameMapPoints = Arrays.asList(startPoint, centralFightPoint, rightFightPoint, leftFightPoint, highFightPoint);
         gameMap = new GameMap(gameMapImage, gameMapPoints, tolerance);

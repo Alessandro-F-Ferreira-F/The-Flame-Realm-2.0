@@ -72,6 +72,6 @@ public final class TheadDarkusManifest implements EncounterManifest {
 
         GameText bossHpText = UiFactory.text(assets, combatScreenFont, combatScreenTextSize, white, "HP: " + theadDarkusHp);
 
-        return new CombatEncounter(boss, theadDarkusAtks, bossHpText);
+        return new CombatEncounter(boss, theadDarkusAtks, bossHpText, theadDarkusHp, descriptors);
     }
 }
