@@ -106,21 +106,27 @@ public class CombatScreen extends BaseScreen {
             if (!playerLastAtk.getIsOver()) {
                 playerLastAtk.update();
             } else if (encounter.boss.getHealthPoints() == 0) {
+                final CombatEncounter enc = encounter;
                 turnoAtual = Turn.PLAYER;
-                instances.playerCombatForm.revive(GameConstants.playerHp);
-                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
 
-                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
-                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
+                game.loading.beginTransition(
+                        () -> assets.unload(enc.descriptors),
+                        () -> {
+                            instances.playerCombatForm.revive(GameConstants.playerHp);
+                            instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
+                            instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
+                            instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
 
-                encounter.boss.revive(encounter.maxHp);
-                encounter.bossHpText.setMessage("HP: " + encounter.maxHp);
+                            enc.boss.revive(enc.maxHp);
+                            enc.bossHpText.setMessage("HP: " + enc.maxHp);
 
-                instances.gameMap.disableCurrentPoint();
-                instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
-                assets.unload(encounter.descriptors);
+                            instances.gameMap.disableCurrentPoint();
+                            instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
+                        },
+                        () -> game.play);
+
                 encounter = null;
-                game.setScreen(game.play);
+                game.setScreen(game.loading);
                 return true;
             }
         }

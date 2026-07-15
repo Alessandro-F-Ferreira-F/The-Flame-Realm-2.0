@@ -14,17 +14,22 @@ final class FadeGate {
     enum Phase { FADE_IN, LOADING, FADE_OUT }
 
     private static final float FADE_TIME = 0.25f; // seg
-    private static final float MIN_SHOW = 1f;  // tempo minimo em LOADING
 
     private Phase phase = Phase.FADE_IN;
     private float fadeAlpha = 0f;
     private float shownTime = 0f;
+    private float minShow = 1f;  // tempo minimo em LOADING
 
     /** Reinicia a maquina (chamar ao configurar/entrar na tela). */
     void reset() {
         phase = Phase.FADE_IN;
         fadeAlpha = 0f;
         shownTime = 0f;
+    }
+
+    /** Define o tempo minimo em LOADING (quem for dono do valor define antes de cada reset). */
+    void setMinShow(float seconds) {
+        this.minShow = seconds;
     }
 
     Phase phase() {
@@ -44,7 +49,7 @@ final class FadeGate {
     /** Avanca o LOADING. Retorna true quando a carga terminou E o tempo minimo passou. */
     boolean tickLoading(float delta, boolean loadingDone) {
         shownTime += delta;
-        if (loadingDone && shownTime >= MIN_SHOW) {
+        if (loadingDone && shownTime >= minShow) {
             phase = Phase.FADE_OUT;
             return true;
         }

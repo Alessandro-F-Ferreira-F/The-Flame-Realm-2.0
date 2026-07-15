@@ -68,8 +68,8 @@ public final class GameConstants {
     // 2.2.5 - combat screen
     public static final Vector2 vortexButtonPosition = new Vector2(SCREEN_WIDTH * 0.25f, SCREEN_HEIGHT * 0.8f);
     public static final Vector2 azuringButtonPosition = new Vector2(SCREEN_WIDTH * 0.25f, SCREEN_HEIGHT * 0.9f);
-    public static final Vector2 nebulaButtonPosition = new Vector2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.9f);
-    public static final Vector2 razorButtonPosition = new Vector2(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.8f);
+    public static final Vector2 nebulaButtonPosition = new Vector2(SCREEN_WIDTH * 0.54f, SCREEN_HEIGHT * 0.9f);
+    public static final Vector2 razorButtonPosition = new Vector2(SCREEN_WIDTH * 0.54f, SCREEN_HEIGHT * 0.8f);
 
     public static final Vector2 secretEyePosition = new Vector2(SCREEN_WIDTH * 0.5125f, SCREEN_HEIGHT * 0.065f);
 

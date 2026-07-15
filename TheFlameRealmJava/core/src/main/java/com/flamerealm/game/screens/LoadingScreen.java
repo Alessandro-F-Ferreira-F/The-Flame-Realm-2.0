@@ -28,10 +28,14 @@ public class LoadingScreen extends BaseScreen {
     private static final float BAR_X = (GameConstants.SCREEN_WIDTH - BAR_WIDTH) / 2f;
     private static final float BAR_Y = GameConstants.SCREEN_HEIGHT / 2f - BAR_HEIGHT / 2f;
 
+    private static final float DEFAULT_MIN_SHOW = 1f;     // carga normal
+    private static final float TRANSITION_MIN_SHOW = 0.3f; // fade sem carga
+
     private final FadeGate fade = new FadeGate();
     private Runnable loadJob;
     private Runnable postLoadJob;
     private Supplier<Screen> next;
+    private boolean showBar = true;
 
     public LoadingScreen(FlameRealmGame game) {
         super(game);
@@ -51,7 +55,16 @@ public class LoadingScreen extends BaseScreen {
         this.loadJob = loadJob;
         this.postLoadJob = postLoadJob;
         this.next = next;
+        this.showBar = true;
+        fade.setMinShow(DEFAULT_MIN_SHOW);
         fade.reset();
+    }
+
+    /** Transição sem carga real (fade + jobs), barra oculta e hold curto. */
+    public void beginTransition(Runnable loadJob, Runnable postLoadJob, Supplier<Screen> next) {
+        begin(loadJob, postLoadJob, next);
+        this.showBar = false;
+        fade.setMinShow(TRANSITION_MIN_SHOW);
     }
 
     @Override
@@ -80,13 +93,15 @@ public class LoadingScreen extends BaseScreen {
 
     @Override
     protected void draw(float delta) {
-        batch.setColor(GameConstants.black);
-        batch.draw(assets.whitePixel(), BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT);
+        if (showBar) {
+            batch.setColor(GameConstants.black);
+            batch.draw(assets.whitePixel(), BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT);
 
-        batch.setColor(GameConstants.green);
-        batch.draw(assets.whitePixel(), BAR_X, BAR_Y, BAR_WIDTH * assets.getProgress(), BAR_HEIGHT);
+            batch.setColor(GameConstants.green);
+            batch.draw(assets.whitePixel(), BAR_X, BAR_Y, BAR_WIDTH * assets.getProgress(), BAR_HEIGHT);
 
-        batch.setColor(Color.WHITE);
+            batch.setColor(Color.WHITE);
+        }
 
         fade.drawOverlay(batch, assets.whitePixel(), GameConstants.SCREEN_WIDTH, GameConstants.SCREEN_HEIGHT);
     }
