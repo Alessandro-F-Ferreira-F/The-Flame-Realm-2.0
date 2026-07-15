@@ -11,6 +11,7 @@ import com.flamerealm.game.screens.BootLoadingScreen;
 import com.flamerealm.game.screens.CombatScreen;
 import com.flamerealm.game.screens.DeathScreen;
 import com.flamerealm.game.screens.HistoryScreen;
+import com.flamerealm.game.screens.LoadingScreen;
 import com.flamerealm.game.screens.MainMenuScreen;
 import com.flamerealm.game.screens.PauseScreen;
 import com.flamerealm.game.screens.PlayScreen;
@@ -33,6 +34,7 @@ public class FlameRealmGame extends Game {
     public CombatScreen combat;
     public PauseScreen pause;
     public DeathScreen death;
+    public LoadingScreen loading;
 
     @Override
     public void create() {
@@ -61,6 +63,7 @@ public class FlameRealmGame extends Game {
         combat = new CombatScreen(this);
         pause = new PauseScreen(this);
         death = new DeathScreen(this);
+        loading = new LoadingScreen(this); // singleton reaproveitado (Fase 1)
 
         setScreen(mainMenu);
     }
