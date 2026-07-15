@@ -5,7 +5,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.flamerealm.game.assets.CoreAssets;
 import com.flamerealm.game.instances.GameInstances;
+import com.flamerealm.game.screens.BootLoadingScreen;
 import com.flamerealm.game.screens.CombatScreen;
 import com.flamerealm.game.screens.DeathScreen;
 import com.flamerealm.game.screens.HistoryScreen;
@@ -44,6 +46,12 @@ public class FlameRealmGame extends Game {
         camera.setToOrtho(true, GameConstants.SCREEN_WIDTH, GameConstants.SCREEN_HEIGHT);
         batch.setProjectionMatrix(camera.combined);
 
+        assets.queue(CoreAssets.INSTANCE.descriptors());
+        setScreen(new BootLoadingScreen(this));
+    }
+
+    /** Chamado pela BootLoadingScreen quando o grupo nucleo termina de carregar. */
+    public void onCoreLoaded() {
         instances = new GameInstances(assets);
 
         mainMenu = new MainMenuScreen(this);

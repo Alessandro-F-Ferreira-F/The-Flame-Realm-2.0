@@ -1,6 +1,7 @@
 package com.flamerealm.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
 import java.util.HashMap;
@@ -63,6 +65,36 @@ public class Assets implements Disposable {
             region.flip(false, true);
             return region;
         });
+    }
+
+    /** Enfileira um asset (nao bloqueia). */
+    public void queue(String path, Class<?> type) {
+        if (!assetManager.isLoaded(path)) {
+            assetManager.load(path, type);
+        }
+    }
+
+    /** Enfileira uma lista de descriptors. */
+    public void queue(Array<AssetDescriptor<?>> descriptors) {
+        for (AssetDescriptor<?> d : descriptors) {
+            if (!assetManager.isLoaded(d.fileName)) {
+                assetManager.load(d);
+            }
+        }
+    }
+
+    /** Chamado 1x por frame pela BootLoadingScreen. true = fila vazia. */
+    public boolean updateLoading() {
+        return assetManager.update();
+    }
+
+    public float getProgress() {
+        return assetManager.getProgress();
+    }
+
+    /** Obtem um asset ja carregado (sem bloquear). */
+    public <T> T get(String path, Class<T> type) {
+        return assetManager.get(path, type);
     }
 
     public BitmapFont font(String fontPath, int size, boolean bold) {

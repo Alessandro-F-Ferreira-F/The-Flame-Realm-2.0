@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.Assets;
-import com.flamerealm.game.GameConstants;
 import com.flamerealm.game.attacks.Attack;
 import com.flamerealm.game.attacks.BossAttack;
 import com.flamerealm.game.attacks.PlayerAttack;
