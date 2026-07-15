@@ -9,15 +9,17 @@ import java.util.function.Supplier;
 
 /**
  * Tela de loading generica e reutilizavel (singleton reaproveitado). Antes de
- * virar a tela ativa, configurar via begin(loadJob, next): loadJob enfileira
- * os assets do proximo grupo (Command) e next informa a tela de destino
- * (continuation), ja que esta tela nao tem destino fixo. Uso esperado:
+ * virar a tela ativa, configurar via begin(loadJob, postLoadJob, next):
+ * loadJob enfileira os assets do proximo grupo (Command), postLoadJob constroi
+ * objetos pos-carga (ex.: um CombatEncounter) e next informa a tela de destino
+ * (continuation), ja que esta tela nao tem destino fixo. Uso esperado (ver
+ * PlayScreen, que roteia Play -> Combat com carga lazy do encontro):
  *
- *   game.loading.begin(bossManifest, () -> game.combat);
+ *   game.loading.begin(
+ *           () -> assets.queue(manifest.descriptors()),
+ *           () -> game.combat.setEncounter(manifest.build(assets)),
+ *           () -> game.combat);
  *   game.setScreen(game.loading);
- *
- * Fase 1: nenhum call site chama begin() ainda - fica pronta para a Fase 2
- * rotear Play -> Combat com carga lazy do encontro (via onLoaded()).
  */
 public class LoadingScreen extends BaseScreen {
 
@@ -28,6 +30,7 @@ public class LoadingScreen extends BaseScreen {
 
     private final FadeGate fade = new FadeGate();
     private Runnable loadJob;
+    private Runnable postLoadJob;
     private Supplier<Screen> next;
 
     public LoadingScreen(FlameRealmGame game) {
@@ -36,7 +39,17 @@ public class LoadingScreen extends BaseScreen {
 
     /** Configura o job de carga + destino e reseta o fade. Chamar antes de game.setScreen(game.loading). */
     public void begin(Runnable loadJob, Supplier<Screen> next) {
+        begin(loadJob, () -> { }, next);
+    }
+
+    /**
+     * Configura o job de carga (Command), um hook pos-carga (ex.: construir um
+     * CombatEncounter apos os assets do encontro terminarem de carregar) e o
+     * destino (continuation), e reseta o fade. Chamar antes de game.setScreen(game.loading).
+     */
+    public void begin(Runnable loadJob, Runnable postLoadJob, Supplier<Screen> next) {
         this.loadJob = loadJob;
+        this.postLoadJob = postLoadJob;
         this.next = next;
         fade.reset();
     }
@@ -52,7 +65,7 @@ public class LoadingScreen extends BaseScreen {
             case LOADING:
                 boolean done = assets.updateLoading();
                 if (fade.tickLoading(delta, done)) {
-                    onLoaded();
+                    postLoadJob.run(); // constroi objetos pos-carga (ex.: CombatEncounter)
                 }
                 break;
             case FADE_OUT:
@@ -63,10 +76,6 @@ public class LoadingScreen extends BaseScreen {
                 break;
         }
         return false;
-    }
-
-    /** Hook: construir objetos pos-carga (ex.: CombatEncounter na Fase 2). Vazio nesta fase. */
-    protected void onLoaded() {
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.GameConstants;
 import com.flamerealm.game.attacks.BossAttack;
 import com.flamerealm.game.attacks.PlayerAttack;
+import com.flamerealm.game.instances.CombatEncounter;
 
 /**
  * Port do bloco "Combat screen" de main.py: combate por turnos entre
@@ -24,9 +25,15 @@ public class CombatScreen extends BaseScreen {
     private BossAttack enemyLastAtk;
     private float elapsedSinceLastClick = WAIT_TIME + 1f;
     private boolean usedFuryOfTheEye;
+    private CombatEncounter encounter;
 
     public CombatScreen(FlameRealmGame game) {
         super(game);
+    }
+
+    /** Chamado pela LoadingScreen (postLoadJob) antes desta tela virar ativa. */
+    public void setEncounter(CombatEncounter encounter) {
+        this.encounter = encounter;
     }
 
     @Override
@@ -51,15 +58,15 @@ public class CombatScreen extends BaseScreen {
             playerLastAtk.getAtkButton().getText().setMessage(playerLastAtk.getName() + "\nDamage/Uses: "
                     + playerLastAtk.getDamage() + "/" + playerLastAtk.getMana());
             instances.playerCombatForm.setManaPoints(instances.playerCombatForm.getManaPoints() - playerLastAtk.getMana());
-            instances.theadDarkus.setHealthPoints(instances.theadDarkus.getHealthPoints() - playerLastAtk.getDamage());
+            encounter.boss.setHealthPoints(encounter.boss.getHealthPoints() - playerLastAtk.getDamage());
 
             instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
-            instances.theadDarkusHpText.setMessage("HP: " + instances.theadDarkus.getHealthPoints());
+            encounter.bossHpText.setMessage("HP: " + encounter.boss.getHealthPoints());
         }
 
         if (instances.secretEyeButton.mouseInButton() && !usedFuryOfTheEye) {
-            instances.theadDarkus.setHealthPoints(instances.theadDarkus.getHealthPoints() - GameConstants.furyOfTheEyeDamage);
-            instances.theadDarkusHpText.setMessage("HP: " + instances.theadDarkus.getHealthPoints());
+            encounter.boss.setHealthPoints(encounter.boss.getHealthPoints() - GameConstants.furyOfTheEyeDamage);
+            encounter.bossHpText.setMessage("HP: " + encounter.boss.getHealthPoints());
             instances.furyOfTheEye.setIsOver(false);
             usedFuryOfTheEye = true;
         }
@@ -84,8 +91,8 @@ public class CombatScreen extends BaseScreen {
                 instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
                 instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
 
-                instances.theadDarkus.revive(GameConstants.theadDarkusHp);
-                instances.theadDarkusHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
+                encounter.boss.revive(GameConstants.theadDarkusHp);
+                encounter.bossHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
 
                 instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
                 game.setScreen(game.death);
@@ -96,7 +103,7 @@ public class CombatScreen extends BaseScreen {
         if (playerLastAtk != null) {
             if (!playerLastAtk.getIsOver()) {
                 playerLastAtk.update();
-            } else if (instances.theadDarkus.getHealthPoints() == 0) {
+            } else if (encounter.boss.getHealthPoints() == 0) {
                 turnoAtual = Turn.PLAYER;
                 instances.playerCombatForm.revive(GameConstants.playerHp);
                 instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
@@ -104,8 +111,8 @@ public class CombatScreen extends BaseScreen {
                 instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
                 instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
 
-                instances.theadDarkus.revive(GameConstants.theadDarkusHp);
-                instances.theadDarkusHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
+                encounter.boss.revive(GameConstants.theadDarkusHp);
+                encounter.bossHpText.setMessage("HP: " + GameConstants.theadDarkusHp);
 
                 instances.gameMap.disableCurrentPoint();
                 instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
@@ -116,7 +123,7 @@ public class CombatScreen extends BaseScreen {
 
         if (turnoAtual == Turn.ENEMY && elapsedSinceLastClick >= WAIT_TIME / 2f && elapsedSinceLastClick <= WAIT_TIME) {
             if (enemyLastAtk == null) {
-                enemyLastAtk = instances.theadDarkus.randomizeAtk();
+                enemyLastAtk = encounter.boss.randomizeAtk();
                 enemyLastAtk.randomizeHitKill();
                 enemyLastAtk.setIsOver(false);
 
@@ -129,7 +136,7 @@ public class CombatScreen extends BaseScreen {
             }
         }
 
-        instances.theadDarkus.update();
+        encounter.boss.update();
         instances.playerCombatForm.update();
 
         return false;
@@ -141,7 +148,7 @@ public class CombatScreen extends BaseScreen {
 
         batch.draw(instances.battleScreen, 0, 0);
 
-        batch.draw(instances.theadDarkus.getImage(), instances.theadDarkus.getPosition().x, instances.theadDarkus.getPosition().y);
+        batch.draw(encounter.boss.getImage(), encounter.boss.getPosition().x, encounter.boss.getPosition().y);
         batch.draw(instances.playerCombatForm.getImage(), instances.playerCombatForm.getPosition().x, instances.playerCombatForm.getPosition().y);
 
         batch.setColor(GameConstants.black);
@@ -150,7 +157,7 @@ public class CombatScreen extends BaseScreen {
 
         batch.setColor(GameConstants.red);
         batch.draw(assets.whitePixel(), GameConstants.SCREEN_WIDTH * 0.035f, GameConstants.SCREEN_HEIGHT * 0.86f,
-                instances.theadDarkus.getHealthPoints() * 0.4f, 15);
+                encounter.boss.getHealthPoints() * 0.4f, 15);
         batch.draw(assets.whitePixel(), GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.8f,
                 instances.playerCombatForm.getHealthPoints() * 0.8f, 15);
 
@@ -159,7 +166,7 @@ public class CombatScreen extends BaseScreen {
                 instances.playerCombatForm.getManaPoints() * 0.8f, 15);
         batch.setColor(Color.WHITE);
 
-        instances.theadDarkusHpText.draw(batch, GameConstants.SCREEN_WIDTH * 0.035f, GameConstants.SCREEN_HEIGHT * 0.9f);
+        encounter.bossHpText.draw(batch, GameConstants.SCREEN_WIDTH * 0.035f, GameConstants.SCREEN_HEIGHT * 0.9f);
         instances.playerCombatFormHpText.draw(batch, GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.83f);
         instances.playerCombatFormManaText.draw(batch, GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.92f);
 

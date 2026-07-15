@@ -6,7 +6,8 @@ import com.badlogic.gdx.utils.Array;
 
 /**
  * Manifesto do grupo nucleo: assets sempre residentes, carregados no boot.
- * Nesta fase inclui tudo (inclusive o chefe) - a divisao lazy chega na Fase 2.
+ * O chefe (Thead Darkus) nao entra aqui - e um grupo lazy, carregado sob
+ * demanda ao entrar em combate (ver TheadDarkusManifest).
  */
 public final class CoreAssets implements AssetGroup {
     private static final String[] PATHS = {
@@ -26,11 +27,6 @@ public final class CoreAssets implements AssetGroup {
             "Images/Attacks/Player/Dual Vortex.png",
             "Images/Attacks/Player/Razor.png",
 
-            "Images/Attacks/Boss/Elden Ring.png",
-            "Images/Attacks/Boss/Flamelash.png",
-            "Images/Attacks/Boss/Dark Vortex.png",
-            "Images/Attacks/Boss/Fire Soul.png",
-
             "Images/PuzzleElements/Fury of the eye.png",
 
             "Images/Characters/Player/main character (walking up).png",
@@ -38,8 +34,6 @@ public final class CoreAssets implements AssetGroup {
             "Images/Characters/Player/main character (walking right).png",
             "Images/Characters/Player/main character (walking left).png",
             "Images/Characters/Player/BlueMageGuardian.png",
-
-            "Images/Characters/Boss/Thead Darkus.png",
 
             "Images/Gamemaps/GameMap.png",
 

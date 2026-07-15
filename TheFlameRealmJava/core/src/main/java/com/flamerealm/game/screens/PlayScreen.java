@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.GameConstants;
+import com.flamerealm.game.assets.TheadDarkusManifest;
 
 import java.util.List;
 
@@ -116,7 +117,11 @@ public class PlayScreen extends BaseScreen {
             instances.playerObject.setMoving(false);
 
             if (instances.gameMap.getCurrentPoint().getActivated()) {
-                game.setScreen(game.combat);
+                game.loading.begin(
+                        () -> assets.queue(TheadDarkusManifest.INSTANCE.descriptors()),
+                        () -> game.combat.setEncounter(TheadDarkusManifest.INSTANCE.build(assets)),
+                        () -> game.combat);
+                game.setScreen(game.loading);
             } else {
                 instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
             }

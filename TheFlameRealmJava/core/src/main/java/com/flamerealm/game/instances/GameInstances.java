@@ -5,10 +5,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.Assets;
 import com.flamerealm.game.attacks.Attack;
-import com.flamerealm.game.attacks.BossAttack;
 import com.flamerealm.game.attacks.PlayerAttack;
 import com.flamerealm.game.characters.CharacterEntity;
-import com.flamerealm.game.characters.CombatForm;
 import com.flamerealm.game.characters.PlayerCombatForm;
 import com.flamerealm.game.gamemap.FightPoint;
 import com.flamerealm.game.gamemap.GameMap;
@@ -51,7 +49,6 @@ public class GameInstances {
     public final GameText nebulaText;
     public final GameText razorText;
 
-    public final GameText theadDarkusHpText;
     public final GameText playerCombatFormHpText;
     public final GameText playerCombatFormManaText;
 
@@ -89,12 +86,6 @@ public class GameInstances {
     public final PlayerAttack razor;
     public final List<PlayerAttack> playerAtkList;
 
-    public final BossAttack eldenRing;
-    public final BossAttack flamelash;
-    public final BossAttack darkVortex;
-    public final BossAttack fireSoul;
-    public final List<BossAttack> theadDarkusAtks;
-
     public final Attack furyOfTheEye;
 
     // ===== 4 - Characters (port de CharactersInstances.py) =====
@@ -105,7 +96,6 @@ public class GameInstances {
     public final CharacterEntity playerObject;
 
     public final PlayerCombatForm playerCombatForm;
-    public final CombatForm<BossAttack> theadDarkus;
 
     // ===== 5 - Game map (port de GameMapInstances.py) =====
     public final Texture gameMapImage;
@@ -160,7 +150,6 @@ public class GameInstances {
         razorText = UiFactory.text(assets, combatScreenFont, combatScreenTextSize, white,
                 "Razor Shock\nDamage/Uses: " + razorDamage + "/" + razorMana);
 
-        theadDarkusHpText = UiFactory.text(assets, combatScreenFont, combatScreenTextSize, white, "HP: " + theadDarkusHp);
         playerCombatFormHpText = UiFactory.text(assets, combatScreenFont, combatScreenTextSize, white, "HP: " + playerHp);
         playerCombatFormManaText = UiFactory.text(assets, combatScreenFont, combatScreenTextSize, white, "Mana: " + playerMana);
 
@@ -261,24 +250,6 @@ public class GameInstances {
 
         playerAtkList = Arrays.asList(azuring, nebula, vortex, razor);
 
-        Texture eldenRingSprite = assets.texture("Images/Attacks/Boss/Elden Ring.png");
-        eldenRing = new BossAttack("Elden Ring", eldenRingDamage, eldenRingSprite, eldenRingLoops, eldenRingFrames,
-                eldenRingPixels, eldenRingPosition, eldenRingOffset, eldenRingHitKillChance);
-
-        Texture flamelashSprite = assets.texture("Images/Attacks/Boss/Flamelash.png");
-        flamelash = new BossAttack("Flamelash", flamelashDamage, flamelashSprite, flamelashLoops, flamelashFrames,
-                flamelashPixels, flamelashPosition, flamelashOffset, flamelashHitKillChance);
-
-        Texture darkVortexSprite = assets.texture("Images/Attacks/Boss/Dark Vortex.png");
-        darkVortex = new BossAttack("Dark Vortex", darkVortexDamage, darkVortexSprite, darkVortexLoops, darkVortexFrames,
-                darkVortexPixels, darkVortexPosition, darkVortexOffset, darkVortexHitKillChance);
-
-        Texture fireSoulSprite = assets.texture("Images/Attacks/Boss/Fire Soul.png");
-        fireSoul = new BossAttack("Fire Soul", fireSoulDamage, fireSoulSprite, fireSoulLoops, fireSoulFrames,
-                fireSoulPixels, fireSoulPosition, fireSoulOffset, fireSoulHitKillChance);
-
-        theadDarkusAtks = Arrays.asList(flamelash, fireSoul, eldenRing, darkVortex);
-
         Texture furyOfTheEyeImage = assets.texture("Images/PuzzleElements/Fury of the eye.png");
         furyOfTheEye = new Attack("Fury of the eye", furyOfTheEyeDamage, furyOfTheEyeImage, furyOfTheEyeLoops,
                 furyOfTheEueFrames, furyOfTheEyePixels, furyOfTheEyePosition, furyOfTheEyeOffset);
@@ -294,10 +265,6 @@ public class GameInstances {
         Texture combatFormImage = assets.texture("Images/Characters/Player/BlueMageGuardian.png");
         playerCombatForm = new PlayerCombatForm(combatFormImage, combatFormFrames, combatFormSize, combatFormPosition,
                 combatFormOffset, playerHp, playerAtkList, playerMana);
-
-        Texture theadDarkusImage = assets.texture("Images/Characters/Boss/Thead Darkus.png");
-        theadDarkus = new CombatForm<>(theadDarkusImage, theadDarkusFrames, theadDarkusSize, theadDarkusPosition,
-                theadDarkusOffset, theadDarkusHp, theadDarkusAtks);
 
         // 5 - Game map
         gameMapImage = assets.texture("Images/Gamemaps/GameMap.png");
