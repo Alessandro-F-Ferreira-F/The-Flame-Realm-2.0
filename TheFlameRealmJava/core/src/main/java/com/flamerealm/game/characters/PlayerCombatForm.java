@@ -1,11 +1,12 @@
 package com.flamerealm.game.characters;
 
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.flamerealm.game.animation.AnimState;
+import com.flamerealm.game.animation.AnimatedEntity;
 import com.flamerealm.game.attacks.PlayerAttack;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Port de PlayerCombatForm (dentro de CombatForm.py).
@@ -13,9 +14,9 @@ import java.util.List;
 public class PlayerCombatForm extends CombatForm<PlayerAttack> {
     private int manaPoints;
 
-    public PlayerCombatForm(Texture spriteSheet, int qtdFrames, GridPoint2 pixels, Vector2 spritePosition,
-                             float offsetFrames, int healthPoints, List<PlayerAttack> atkList, int manaPoints) {
-        super(spriteSheet, qtdFrames, pixels, spritePosition, offsetFrames, healthPoints, atkList);
+    public PlayerCombatForm(Vector2 position, Map<AnimState, AnimatedEntity> clips, int healthPoints,
+                             List<PlayerAttack> atkList, int manaPoints) {
+        super(position, clips, healthPoints, atkList);
         this.manaPoints = manaPoints;
     }
 

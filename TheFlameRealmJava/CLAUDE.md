@@ -22,8 +22,10 @@ Comandos:
 
 - `FlameRealmGame` — classe `Game`; guarda `batch`, `assets`, `instances` e as
   instâncias singleton de cada tela (`game.mainMenu`, `game.play`, `game.combat`, etc.).
-- `GameConstants` — port literal de `parameters.py`. Todas as cores, posições,
-  dimensões, fontes e stats. Mesmos nomes/ordem do original.
+- `GameConstants` — port literal de `parameters.py` para UI/mapa/player (cores,
+  posições, dimensões, fontes, stats do player). Os parâmetros de **inimigos**
+  (corpo, animações, ataques) saíram daqui e viraram dados declarativos em
+  `characters/Bestiary` — ver abaixo.
 - `instances/GameInstances` — monta TODOS os objetos do jogo (textos, botões,
   ataques, personagens, mapa) numa ordem de dependência fixa. É o "composition root".
 - `screens/` — `BaseScreen` (base abstrata) + 7 telas: `MainMenuScreen`,
@@ -33,6 +35,26 @@ Comandos:
   `SpriteButton`; `UiFactory` (helpers para montar UI a partir de Assets+Constants).
 - `attacks/`, `characters/`, `gamemap/`, `animation/` — modelo de domínio.
 - `Assets` — carregamento de texturas e fontes (BitmapFont via FreeType).
+
+### Inimigos data-driven (`Bestiary` + `SpecEncounterManifest`)
+
+- `characters/Bestiary` — registro estático de `EnemySpec` (um por inimigo:
+  nome, HP, `CombatBodySpec` e lista de `BossAttackSpec`). Adicionar um inimigo
+  novo é declarar uma constante aqui, sem criar classe nova.
+- `assets/SpecEncounterManifest` — `EncounterManifest` genérico dirigido por um
+  `EnemySpec`; substitui manifestos por-chefe. Cada `FightPoint` em
+  `GameInstances` recebe `new SpecEncounterManifest(Bestiary.X)`.
+- `animation/AnimState` (`IDLE/ATTACK/HURT/DEATH`) — estados de animação
+  compartilhados entre `CombatForm` (inimigo) e `PlayerCombatForm` (player).
+  `CombatForm` guarda um `AnimatedEntity` por estado presente no spec;
+  `setState(...)` é no-op se o combatente não tiver clipe para aquele estado
+  (ex.: um inimigo só com IDLE). IDLE toca em loop; ATTACK/HURT tocam uma vez e
+  voltam a IDLE; DEATH toca uma vez e segura o último frame — `CombatScreen`
+  aguarda `isDeathAnimationFinished()` antes de trocar de tela.
+- `animation/AnimationSpec` aceita um `sheetOffset` opcional (canto onde a
+  fileira do estado começa na sheet), usado por `AnimatedEntity` ao fatiar os
+  frames — suporta sheets multi-linha (várias animações numa imagem só), como
+  o corpo do Necromancer.
 
 ## Convenções importantes
 

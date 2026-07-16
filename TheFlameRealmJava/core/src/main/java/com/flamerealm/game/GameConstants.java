@@ -105,22 +105,18 @@ public final class GameConstants {
     // 4 - Characters Sprites
 
     // 4.1 - Dimensions (in pixels)
-    public static final GridPoint2 theadDarkusSize = new GridPoint2(224, 240);
     public static final GridPoint2 combatFormSize = new GridPoint2(128, 128);
     public static final GridPoint2 playerSize = new GridPoint2(48, 64);
 
     // 4.2 - Number of Frames
-    public static final int theadDarkusFrames = 15;
     public static final int combatFormFrames = 14;
     public static final int playerMoveFrames = 4;
 
     // 4.3 Offsets (dictates the animation speed)
-    public static final float theadDarkusOffset = 0.18f;
     public static final float combatFormOffset = 0.18f;
     public static final float playerOffset = 0.1f;
 
     // 4.4 Positions (top-left of the images)
-    public static final Vector2 theadDarkusPosition = new Vector2(0, SCREEN_HEIGHT * 0.3f);
     public static final Vector2 combatFormPosition = new Vector2(SCREEN_WIDTH * 0.8f, SCREEN_HEIGHT * 0.5f);
     public static final Vector2 playerPosition = new Vector2(SCREEN_WIDTH / 2f - playerSize.x / 2f, SCREEN_HEIGHT / 2f - playerSize.y / 2f);
 
@@ -170,50 +166,6 @@ public final class GameConstants {
     public static final float nebulaOffset = 0.5f;
     public static final float razorOffset = 1.2f;
 
-    // 5.2 - Boss
-
-    // 5.2.1 - Damage
-    public static final int eldenRingDamage = 30;
-    public static final int fireSoulDamage = 40;
-    public static final int darkVortexDamage = 100;
-    public static final int flamelashDamage = 10;
-
-    // 5.2.2 - HitKill Chance
-    public static final int eldenRingHitKillChance = 90;
-    public static final int fireSoulHitKillChance = 80;
-    public static final int darkVortexHitKillChance = 100;
-    public static final int flamelashHitKillChance = 70;
-
-    // 5.2.3 - Dimensions (in pixels)
-    public static final GridPoint2 eldenRingPixels = new GridPoint2(40, 40);
-    public static final GridPoint2 fireSoulPixels = new GridPoint2(50, 50);
-    public static final GridPoint2 darkVortexPixels = new GridPoint2(128, 128);
-    public static final GridPoint2 flamelashPixels = new GridPoint2(100, 100);
-
-    // 5.2.4 - Number of frames
-    public static final int eldenRingFrames = 60;
-    public static final int fireSoulFrames = 60;
-    public static final int darkVortexFrames = 61;
-    public static final int flamelashFrames = 45;
-
-    // 5.2.5 - Positions
-    public static final Vector2 eldenRingPosition = new Vector2(SCREEN_WIDTH * 0.848f, SCREEN_HEIGHT * 0.55f);
-    public static final Vector2 fireSoulPosition = new Vector2(SCREEN_WIDTH * 0.84f, SCREEN_HEIGHT * 0.55f);
-    public static final Vector2 darkVortexPosition = new Vector2(SCREEN_WIDTH * 0.8f, SCREEN_HEIGHT * 0.45f);
-    public static final Vector2 flamelashPosition = new Vector2(SCREEN_WIDTH * 0.82f, SCREEN_HEIGHT * 0.5f);
-
-    // 5.2.6 - Loops
-    public static final int eldenRingLoops = 4;
-    public static final int fireSoulLoops = 3;
-    public static final int darkVortexLoops = 1;
-    public static final int flamelashLoops = 3;
-
-    // 5.2.7 - Offsets
-    public static final float eldenRingOffset = 0.9f;
-    public static final float fireSoulOffset = 0.7f;
-    public static final float darkVortexOffset = 0.2f;
-    public static final float flamelashOffset = 0.6f;
-
     // 5.3 Fury of the eye
     public static final int furyOfTheEyeDamage = 200;
     public static final GridPoint2 furyOfTheEyePixels = new GridPoint2(64, 64);
@@ -241,11 +193,7 @@ public final class GameConstants {
     public static final int playerHp = 100;
     public static final int playerMana = 100;
 
-    public static final int playerHpBarSize = 100;
-    public static final int playerManaBarSize = playerHpBarSize;
-
-    // 7.2 - Boss
-    public static final int theadDarkusHp = 400;
-
-    public static final int theadDarkusHpBarSize = 200;
+    public static final float bossHpBarMaxWidth = 160f;    // era hp * 0.4f com maxHp 400
+    public static final float playerHpBarMaxWidth = 80f;   // era hp * 0.8f com maxHp 100
+    public static final float playerManaBarMaxWidth = 80f; // era mana * 0.8f com maxMana 100
 }

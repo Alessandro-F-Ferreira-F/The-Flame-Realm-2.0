@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.GameConstants;
+import com.flamerealm.game.animation.AnimState;
 import com.flamerealm.game.attacks.BossAttack;
 import com.flamerealm.game.attacks.PlayerAttack;
 import com.flamerealm.game.instances.CombatEncounter;
@@ -59,6 +60,8 @@ public class CombatScreen extends BaseScreen {
                     + playerLastAtk.getDamage() + "/" + playerLastAtk.getMana());
             instances.playerCombatForm.setManaPoints(instances.playerCombatForm.getManaPoints() - playerLastAtk.getMana());
             encounter.boss.setHealthPoints(encounter.boss.getHealthPoints() - playerLastAtk.getDamage());
+            instances.playerCombatForm.setState(AnimState.ATTACK);
+            encounter.boss.setState(AnimState.HURT);
 
             instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
             encounter.bossHpText.setMessage("HP: " + encounter.boss.getHealthPoints());
@@ -85,20 +88,23 @@ public class CombatScreen extends BaseScreen {
             enemyLastAtk = null;
 
             if (instances.playerCombatForm.getHealthPoints() == 0) {
-                instances.playerCombatForm.revive(GameConstants.playerHp);
-                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
+                instances.playerCombatForm.setState(AnimState.DEATH);
+                if (instances.playerCombatForm.isDeathAnimationFinished()) {
+                    instances.playerCombatForm.revive(GameConstants.playerHp);
+                    instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
 
-                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
-                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
+                    instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
+                    instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
 
-                encounter.boss.revive(encounter.maxHp);
-                encounter.bossHpText.setMessage("HP: " + encounter.maxHp);
+                    encounter.boss.revive(encounter.maxHp);
+                    encounter.bossHpText.setMessage("HP: " + encounter.maxHp);
 
-                instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
-                assets.unload(encounter.descriptors);
-                encounter = null;
-                game.setScreen(game.death);
-                return true;
+                    instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
+                    assets.unload(encounter.descriptors);
+                    encounter = null;
+                    game.setScreen(game.death);
+                    return true;
+                }
             }
         }
 
@@ -106,28 +112,31 @@ public class CombatScreen extends BaseScreen {
             if (!playerLastAtk.getIsOver()) {
                 playerLastAtk.update();
             } else if (encounter.boss.getHealthPoints() == 0) {
-                final CombatEncounter enc = encounter;
-                turnoAtual = Turn.PLAYER;
+                encounter.boss.setState(AnimState.DEATH);
+                if (encounter.boss.isDeathAnimationFinished()) {
+                    final CombatEncounter enc = encounter;
+                    turnoAtual = Turn.PLAYER;
 
-                game.loading.beginTransition(
-                        () -> assets.unload(enc.descriptors),
-                        () -> {
-                            instances.playerCombatForm.revive(GameConstants.playerHp);
-                            instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
-                            instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
-                            instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
+                    game.loading.beginTransition(
+                            () -> assets.unload(enc.descriptors),
+                            () -> {
+                                instances.playerCombatForm.revive(GameConstants.playerHp);
+                                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
+                                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
+                                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
 
-                            enc.boss.revive(enc.maxHp);
-                            enc.bossHpText.setMessage("HP: " + enc.maxHp);
+                                enc.boss.revive(enc.maxHp);
+                                enc.bossHpText.setMessage("HP: " + enc.maxHp);
 
-                            instances.gameMap.disableCurrentPoint();
-                            instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
-                        },
-                        () -> game.play);
+                                instances.gameMap.disableCurrentPoint();
+                                instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
+                            },
+                            () -> game.play);
 
-                encounter = null;
-                game.setScreen(game.loading);
-                return true;
+                    encounter = null;
+                    game.setScreen(game.loading);
+                    return true;
+                }
             }
         }
 
@@ -139,6 +148,8 @@ public class CombatScreen extends BaseScreen {
 
                 instances.playerCombatForm.setHealthPoints(instances.playerCombatForm.getHealthPoints() - enemyLastAtk.getDamage());
                 instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
+                encounter.boss.setState(AnimState.ATTACK);
+                instances.playerCombatForm.setState(AnimState.HURT);
             }
 
             if (!enemyLastAtk.getIsOver()) {
@@ -165,15 +176,19 @@ public class CombatScreen extends BaseScreen {
         batch.draw(assets.whitePixel(), 0, GameConstants.SCREEN_HEIGHT * 0.75f,
                 GameConstants.SCREEN_WIDTH, GameConstants.SCREEN_HEIGHT * 0.25f);
 
+        float bossHpWidth = (encounter.boss.getHealthPoints() / (float) encounter.maxHp) * GameConstants.bossHpBarMaxWidth;
+        float playerHpWidth = (instances.playerCombatForm.getHealthPoints() / (float) GameConstants.playerHp) * GameConstants.playerHpBarMaxWidth;
+        float playerManaWidth = (instances.playerCombatForm.getManaPoints() / (float) GameConstants.playerMana) * GameConstants.playerManaBarMaxWidth;
+
         batch.setColor(GameConstants.red);
         batch.draw(assets.whitePixel(), GameConstants.SCREEN_WIDTH * 0.035f, GameConstants.SCREEN_HEIGHT * 0.86f,
-                encounter.boss.getHealthPoints() * 0.4f, 15);
+                bossHpWidth, 15);
         batch.draw(assets.whitePixel(), GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.8f,
-                instances.playerCombatForm.getHealthPoints() * 0.8f, 15);
+                playerHpWidth, 15);
 
         batch.setColor(GameConstants.blue);
         batch.draw(assets.whitePixel(), GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.89f,
-                instances.playerCombatForm.getManaPoints() * 0.8f, 15);
+                playerManaWidth, 15);
         batch.setColor(Color.WHITE);
 
         encounter.bossHpText.draw(batch, GameConstants.SCREEN_WIDTH * 0.035f, GameConstants.SCREEN_HEIGHT * 0.9f);

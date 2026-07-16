@@ -25,10 +25,19 @@ public class AnimatedEntity {
     protected Vector2 position;
 
     public AnimatedEntity(Texture spriteSheet, int qtdFrames, GridPoint2 pixels, Vector2 spritePosition, float offsetFrames) {
-        reinitialize(spriteSheet, qtdFrames, pixels, spritePosition, offsetFrames);
+        this(spriteSheet, qtdFrames, pixels, spritePosition, offsetFrames, new GridPoint2(0, 0));
+    }
+
+    /** sheetOffset: canto (em pixels) onde a fileira de frames comeca dentro da sheet - suporta sheets multi-linha. */
+    public AnimatedEntity(Texture spriteSheet, int qtdFrames, GridPoint2 pixels, Vector2 spritePosition, float offsetFrames, GridPoint2 sheetOffset) {
+        reinitialize(spriteSheet, qtdFrames, pixels, spritePosition, offsetFrames, sheetOffset);
     }
 
     protected final void reinitialize(Texture spriteSheet, int qtdFrames, GridPoint2 pixels, Vector2 spritePosition, float offsetFrames) {
+        reinitialize(spriteSheet, qtdFrames, pixels, spritePosition, offsetFrames, new GridPoint2(0, 0));
+    }
+
+    protected final void reinitialize(Texture spriteSheet, int qtdFrames, GridPoint2 pixels, Vector2 spritePosition, float offsetFrames, GridPoint2 sheetOffset) {
         this.spriteSheet = spriteSheet;
         this.qtdFrames = qtdFrames;
         this.pixels = pixels;
@@ -36,7 +45,7 @@ public class AnimatedEntity {
 
         this.frame = new TextureRegion[qtdFrames];
         for (int i = 0; i < qtdFrames; i++) {
-            frame[i] = new TextureRegion(spriteSheet, pixels.x * i, 0, pixels.x, pixels.y);
+            frame[i] = new TextureRegion(spriteSheet, sheetOffset.x + pixels.x * i, sheetOffset.y, pixels.x, pixels.y);
             // Compensa a camera yDown=true (ver FlameRealmGame): sem isso os
             // sprites renderizam de cabeca para baixo.
             frame[i].flip(false, true);

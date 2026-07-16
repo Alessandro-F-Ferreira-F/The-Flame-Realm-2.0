@@ -4,10 +4,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.Assets;
-import com.flamerealm.game.assets.TheadDarkusManifest;
+import com.flamerealm.game.animation.AnimState;
+import com.flamerealm.game.animation.AnimationSpec;
+import com.flamerealm.game.assets.EncounterManifest;
+import com.flamerealm.game.assets.SpecEncounterManifest;
 import com.flamerealm.game.attacks.Attack;
 import com.flamerealm.game.attacks.PlayerAttack;
+import com.flamerealm.game.characters.Bestiary;
 import com.flamerealm.game.characters.CharacterEntity;
+import com.flamerealm.game.characters.CombatBodySpec;
 import com.flamerealm.game.characters.PlayerCombatForm;
 import com.flamerealm.game.gamemap.FightPoint;
 import com.flamerealm.game.gamemap.GameMap;
@@ -20,6 +25,7 @@ import com.flamerealm.game.ui.UiFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static com.flamerealm.game.GameConstants.*;
 
@@ -263,19 +269,24 @@ public class GameInstances {
 
         playerObject = new CharacterEntity(playerSpriteUp, playerMoveFrames, playerSize, playerPosition, playerOffset);
 
-        Texture combatFormImage = assets.texture("Images/Characters/Player/BlueMageGuardian.png");
-        playerCombatForm = new PlayerCombatForm(combatFormImage, combatFormFrames, combatFormSize, combatFormPosition,
-                combatFormOffset, playerHp, playerAtkList, playerMana);
+        CombatBodySpec playerBody = new CombatBodySpec(combatFormPosition,
+                Map.of(AnimState.IDLE, new AnimationSpec("Images/Characters/Player/BlueMageGuardian.png",
+                        combatFormFrames, combatFormSize, combatFormOffset)));
+        playerCombatForm = new PlayerCombatForm(playerBody.position(), playerBody.buildClips(assets),
+                playerHp, playerAtkList, playerMana);
 
         // 5 - Game map
         gameMapImage = assets.texture("Images/Gamemaps/GameMap.png");
 
+        EncounterManifest theadDarkusManifest = new SpecEncounterManifest(Bestiary.THEAD_DARKUS);
+        EncounterManifest necromancerManifest = new SpecEncounterManifest(Bestiary.NECROMANCER);
+
         startPoint = new FightPoint(new Vector2(downPoint), Arrays.asList("UP"), false, null);
         centralFightPoint = new FightPoint(new Vector2(centralPoint), Arrays.asList("UP", "DOWN", "LEFT", "RIGHT"),
-                true, TheadDarkusManifest.INSTANCE);
-        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, TheadDarkusManifest.INSTANCE);
-        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, TheadDarkusManifest.INSTANCE);
-        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, TheadDarkusManifest.INSTANCE);
+                true, theadDarkusManifest);
+        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, necromancerManifest);
+        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, theadDarkusManifest);
+        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, theadDarkusManifest);
 
         List<FightPoint> gameMapPoints = Arrays.asList(startPoint, centralFightPoint, rightFightPoint, leftFightPoint, highFightPoint);
         gameMap = new GameMap(gameMapImage, gameMapPoints, tolerance);
