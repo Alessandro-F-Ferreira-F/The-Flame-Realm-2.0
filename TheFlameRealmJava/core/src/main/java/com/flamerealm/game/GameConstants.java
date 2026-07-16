@@ -147,9 +147,9 @@ public final class GameConstants {
     public static final GridPoint2 razorPixels = new GridPoint2(40, 40);
 
     // 5.1.4 - Number of frames
-    public static final int vortexFrames = 60;
-    public static final int azuringFrames = 60;
-    public static final int nebulaFrames = 64;
+    public static final int vortexFrames = 46;
+    public static final int azuringFrames = 80;
+    public static final int nebulaFrames = 61;
     public static final int razorFrames = 60;
 
     // 5.1.5 - Positions
@@ -193,8 +193,8 @@ public final class GameConstants {
     // 5.2.4 - Number of frames
     public static final int eldenRingFrames = 60;
     public static final int fireSoulFrames = 60;
-    public static final int darkVortexFrames = 60;
-    public static final int flamelashFrames = 49;
+    public static final int darkVortexFrames = 61;
+    public static final int flamelashFrames = 45;
 
     // 5.2.5 - Positions
     public static final Vector2 eldenRingPosition = new Vector2(SCREEN_WIDTH * 0.848f, SCREEN_HEIGHT * 0.55f);
