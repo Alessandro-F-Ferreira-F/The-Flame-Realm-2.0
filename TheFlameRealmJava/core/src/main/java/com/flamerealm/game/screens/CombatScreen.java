@@ -32,20 +32,22 @@ public class CombatScreen extends BaseScreen {
         super(game);
     }
 
-    /** Chamado pela LoadingScreen (postLoadJob) antes desta tela virar ativa. */
+    /**
+     * Chamado pela LoadingScreen (postLoadJob) antes desta tela virar ativa.
+     * Este e o unico seam de inicio de encontro: todo estado de escopo de encontro
+     * (turno, timers, ultimo ataque, uso do Fury) nasce aqui.
+     */
     public void setEncounter(CombatEncounter encounter) {
         this.encounter = encounter;
-    }
-
-    @Override
-    public void show() {
-        usedFuryOfTheEye = false;
+        this.turnoAtual = Turn.PLAYER;
+        this.playerLastAtk = null;
+        this.enemyLastAtk = null;
+        this.elapsedSinceLastClick = WAIT_TIME + 1f;
+        this.usedFuryOfTheEye = false;
     }
 
     @Override
     protected boolean handleInput() {
-        elapsedSinceLastClick += Gdx.graphics.getDeltaTime();
-
         if (!Gdx.input.justTouched() || turnoAtual != Turn.PLAYER) {
             return false;
         }
@@ -79,8 +81,10 @@ public class CombatScreen extends BaseScreen {
 
     @Override
     protected boolean update(float delta) {
+        elapsedSinceLastClick += delta;
+
         if (usedFuryOfTheEye && !instances.furyOfTheEye.getIsOver()) {
-            instances.furyOfTheEye.update();
+            instances.furyOfTheEye.update(delta);
         }
 
         if (elapsedSinceLastClick > WAIT_TIME) {
@@ -100,7 +104,7 @@ public class CombatScreen extends BaseScreen {
                     encounter.bossHpText.setMessage("HP: " + encounter.maxHp);
 
                     instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
-                    assets.unload(encounter.descriptors);
+                    encounter.release(assets);
                     encounter = null;
                     game.setScreen(game.death);
                     return true;
@@ -110,7 +114,7 @@ public class CombatScreen extends BaseScreen {
 
         if (playerLastAtk != null) {
             if (!playerLastAtk.getIsOver()) {
-                playerLastAtk.update();
+                playerLastAtk.update(delta);
             } else if (encounter.boss.getHealthPoints() == 0) {
                 encounter.boss.setState(AnimState.DEATH);
                 if (encounter.boss.isDeathAnimationFinished()) {
@@ -118,7 +122,7 @@ public class CombatScreen extends BaseScreen {
                     turnoAtual = Turn.PLAYER;
 
                     game.loading.beginTransition(
-                            () -> assets.unload(enc.descriptors),
+                            () -> enc.release(assets),
                             () -> {
                                 instances.playerCombatForm.revive(GameConstants.playerHp);
                                 instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
@@ -153,12 +157,12 @@ public class CombatScreen extends BaseScreen {
             }
 
             if (!enemyLastAtk.getIsOver()) {
-                enemyLastAtk.update();
+                enemyLastAtk.update(delta);
             }
         }
 
-        encounter.boss.update();
-        instances.playerCombatForm.update();
+        encounter.boss.update(delta);
+        instances.playerCombatForm.update(delta);
 
         return false;
     }

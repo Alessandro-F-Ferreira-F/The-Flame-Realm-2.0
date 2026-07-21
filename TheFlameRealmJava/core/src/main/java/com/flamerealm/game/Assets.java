@@ -74,22 +74,27 @@ public class Assets implements Disposable {
         }
     }
 
-    /** Enfileira uma lista de descriptors. */
+    /**
+     * Enfileira uma lista de descriptors. SEM guarda de isLoaded: o AssetManager
+     * ja faz contagem de referencia, e o guarda quebraria a simetria com unload()
+     * (suprimiria o incremento sem suprimir o decremento correspondente).
+     * Pre-condicao: cada fileName aparece no maximo uma vez na lista.
+     */
     public void queue(Array<AssetDescriptor<?>> descriptors) {
         for (AssetDescriptor<?> d : descriptors) {
-            if (!assetManager.isLoaded(d.fileName)) {
-                assetManager.load(d);
-            }
+            assetManager.load(d);
         }
     }
 
-    /** Descarrega uma lista de descriptors (nao bloqueia; contagem de referencias
-     * do AssetManager cuida de assets compartilhados entre grupos). */
+    /**
+     * Descarrega uma lista de descriptors. Simetrico a queue(): um decremento por
+     * descriptor. Assets compartilhados com outro grupo sobrevivem, porque o
+     * refcount so chega a zero quando o ultimo dono solta.
+     */
     public void unload(Array<AssetDescriptor<?>> descriptors) {
         for (AssetDescriptor<?> d : descriptors) {
-            if (assetManager.isLoaded(d.fileName)) {
-                assetManager.unload(d.fileName);
-            }
+            regionCache.remove(d.fileName); // evita TextureRegion apontando para Texture disposta
+            assetManager.unload(d.fileName);
         }
     }
 

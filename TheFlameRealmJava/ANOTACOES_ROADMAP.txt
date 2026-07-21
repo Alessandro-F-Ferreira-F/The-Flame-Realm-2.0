@@ -1,0 +1,169 @@
+THE FLAME REALM 2.0 - ANOTACOES DO ROADMAP DE REFATORACAO
+Resumo de bolso das 4 fases + 2 micro-tarefas.
+Detalhe de implementacao completo: REFACTOR_ROADMAP_4_FASES.md
+
+
+ORDEM
+  1 -> 2 -> 3 -> 4 -> 5 -> 6
+  As fases 1, 2 e 3 sao independentes entre si.
+  A fase 4 EXIGE as fases 1 e 2 prontas.
+  A fase 5 vem depois da 2. A fase 6 vem depois da 3.
+  Uma tarefa por commit. Build + git diff + validar antes da proxima.
+
+
+--------------------------------------------------------------------
+FASE 1 - PASSO update NA PlayScreen                     [estrutural]
+--------------------------------------------------------------------
+Problema
+  O refactor de Template Method (input -> update -> draw) foi aplicado
+  so no CombatScreen. Na PlayScreen o draw() ainda move o jogador,
+  muta o mapa, chama fightPointTest() e troca de tela - tudo isso
+  DENTRO de batch.begin()/end(), e sem o "return true" que aborta o
+  frame. E o unico ponto do projeto com setScreen num batch aberto.
+
+Solucao
+  Mover tudo que nao e batch.draw para update(delta).
+  Unico campo novo: "atFightPoint" (booleano), para o draw saber se
+  deve desenhar os botoes de direcao. Os flags moveUp/Down/Left/Right
+  ja existiam e continuam sendo a fonte de qual botao mostrar.
+
+Efeitos colaterais aceitos
+  - O mapa passa a ser desenhado com a posicao ja atualizada (antes
+    era a posicao do frame anterior). Um frame de diferenca.
+  - No frame da transicao para o combate, os botoes de direcao deixam
+    de ser desenhados sobre uma tela ja substituida. Sem impacto
+    visivel: ao voltar do combate os flags sao recalculados.
+
+Por que primeiro
+  Nao depende de nada e e pre-requisito da fase 4 (precisa do delta
+  disponivel dentro da PlayScreen).
+
+
+--------------------------------------------------------------------
+FASE 2 - ESTADO TRANSIENTE DO CombatScreen              [estrutural]
+--------------------------------------------------------------------
+Problema
+  turnoAtual, playerLastAtk, enemyLastAtk e elapsedSinceLastClick tem
+  escopo de ENCONTRO, mas vivem num singleton de escopo de APLICACAO
+  e nunca sao reinicializados. Sobrevivem de um combate para o outro.
+  Hoje nao explode (o HP do chefe novo esta cheio, o que neutraliza o
+  ramo de vitoria), mas e estado morto atravessando fronteira.
+
+Solucao
+  Concentrar o reset em setEncounter(...), NAO em show().
+  Motivo: setEncounter e literalmente o inicio de um encontro; show()
+  e um evento de ciclo de vida que so por coincidencia acontece junto.
+  Com o seam certo, quem adicionar um campo novo sabe onde reseta-lo.
+  O override de show() (que so zerava usedFuryOfTheEye) some.
+
+Nota
+  A alternativa "extrair um CombatTurnState por encontro" foi
+  descartada por enquanto: 5 campos nao justificam classe nova.
+  Reconsiderar quando a maquina de turnos crescer com o puzzle.
+
+
+--------------------------------------------------------------------
+FASE 3 - SIMETRIA DE REFCOUNT DE ASSETS                 [estrutural]
+--------------------------------------------------------------------
+Problema
+  O AssetManager do libGDX ja faz contagem de referencia: load() num
+  asset ja carregado INCREMENTA o contador. Os guardas "if (!isLoaded)"
+  em Assets.queue() suprimem o incremento, mas o unload() decrementa
+  do mesmo jeito. Assimetria.
+  Somado a isso, SpecEncounterManifest gera descriptors duplicados
+  (Necromancer usa a mesma sheet nos 4 AnimState). Hoje o equilibrio
+  existe por COINCIDENCIA (no momento do queue nada esta carregado).
+
+Quando quebra (nao e alcancavel hoje, mas esta a uma linha de distancia)
+  - uma sheet compartilhada entre CoreAssets e um encontro
+  - pre-carregar o proximo encontro com o atual ainda em memoria
+  - um novo caminho de saida do combate que esqueca de descarregar
+
+Solucao (troca a coincidencia por um invariante)
+  a) deduplicar descriptors por fileName no manifesto -> 1 por grupo
+  b) remover os guardas de queue/unload -> deixar o refcount trabalhar
+  c) invalidar o regionCache no unload (hoje sobra TextureRegion
+     apontando para Texture ja disposta)
+  d) mover a liberacao para CombatEncounter.release(assets), que e
+     idempotente -> chamar duas vezes nao decrementa duas vezes
+
+Resultado
+  Se um asset de encontro tambem estiver no nucleo, o refcount vai a 2
+  no queue e volta a 1 no unload. O nucleo sobrevive por construcao.
+
+
+--------------------------------------------------------------------
+FASE 4 - TIMING POR DELTA                             [comportamental]
+--------------------------------------------------------------------
+Problema
+  Animacao e movimento avancam por FRAME RENDERIZADO, nao por tempo:
+    AnimatedEntity: atual += offsetFrames
+    Attack:         idem
+    CombatForm:     progress += clip.getOffsetFrames()
+    PlayScreen:     mapa desloca mapSpeed px por frame
+  Com vsync (padrao do LWJGL3), num monitor de 144 Hz o jogo roda
+  ~2,4x mais rapido que num de 60 Hz. So o WAIT_TIME usa tempo real.
+
+Solucao
+  Os offsets foram calibrados a 60 fps, entao:
+      atual += offsetFrames * REFERENCE_FPS * delta   (REFERENCE_FPS = 60)
+  Preserva EXATAMENTE o comportamento a 60 Hz. Nenhum valor de
+  GameConstants nem do Bestiary precisa ser recalibrado.
+  update() vira update(float delta) em AnimatedEntity, Attack e
+  CombatForm (sem overload sem parametro, para o compilador apontar
+  todos os chamadores).
+  Clamp de delta (MAX_DELTA = 1/30 s) contra saltos apos stutter.
+
+ARMADILHA IMPORTANTE - a tolerancia do FightPoint
+  tolerance = mapSpeed * 0.5 = 3 px foi dimensionada para um passo
+  FIXO de 6 px. Com passo variavel, um frame lento (30 fps -> 12 px)
+  atravessa a janela inteira e o FightPoint NUNCA dispara.
+  Correcao: tolerancia proporcional ao passo real do frame ->
+      gameMap.setTol(max(tolerance, |step| * 0.5))
+  O campo e o setter ja existem no GameMap.
+
+Nao afeta os padroes
+  State, Template Method, Strategy, Singleton e Command ficam intactos.
+  Muda so a aritmetica interna. Por isso e fase isolada, com validacao
+  visual (testar com useVsync(false) temporario, sem commitar).
+
+
+--------------------------------------------------------------------
+FASE 5 (micro) - TIMER DO TURNO NO PASSO CERTO             [limpeza]
+--------------------------------------------------------------------
+  CombatScreen.handleInput() faz:
+      elapsedSinceLastClick += Gdx.graphics.getDeltaTime();
+  Viola o contrato do Template Method (handleInput reage ao toque,
+  update faz o mundo avancar - e um timer de turno e mundo avancando)
+  e ignora o delta que o template ja entrega.
+  Correcao: mover para a primeira linha do update(delta), usando o
+  parametro. Validar que a cadencia do turno (11 s / 5,5 s) nao mudou.
+
+
+--------------------------------------------------------------------
+FASE 6 (micro) - REMOVER CombatEncounter.bossAtks          [limpeza]
+--------------------------------------------------------------------
+  Campo publico, nunca lido, duplica boss.getAtkList(). Duas fontes de
+  verdade para a mesma lista. Remover o campo e o parametro do
+  construtor; ajustar SpecEncounterManifest.build().
+
+
+====================================================================
+FORA DE ESCOPO NESTE ROADMAP (decidido)
+====================================================================
+  - mecanica de mana / softlock: o design prevê vencer o chefe por
+    puzzle, entao nao e alcancavel no escopo atual
+  - deteccao de vitoria fora do ataque normal (Fury of the Eye zerando
+    o HP nao fecha o combate) - conhecido, adiado
+  - tela de vitoria
+  - extrair MapNavigator / State para navegacao no mapa
+  - separar consulta de comando em GameMap.fightPointTest()
+    (hoje e uma query com efeito colateral no currentPoint)
+
+MENORES CONSIDERADOS OK (quirks intencionais / porte fiel, nao mexer)
+  - secretEyeButton desenhado antes do battleScreen (invisivel de
+    proposito)
+  - secretButton compartilhando o GameText historySecretText
+  - returnToMainMenuButton verificado mas nunca desenhado na PlayScreen
+  - typo furyOfTheEueFrames, getters sem uso (getLimiteLoops,
+    getIdle/setIdle, overload queue(String, Class))

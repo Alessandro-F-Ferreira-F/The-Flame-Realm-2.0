@@ -3,6 +3,7 @@ package com.flamerealm.game.characters;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.flamerealm.game.GameConstants;
 import com.flamerealm.game.animation.AnimState;
 import com.flamerealm.game.animation.AnimatedEntity;
 import com.flamerealm.game.attacks.Attack;
@@ -47,7 +48,7 @@ public class CombatForm<T extends Attack> {
         progress = 0f;
     }
 
-    public void update() {
+    public void update(float delta) {
         AnimatedEntity clip = clips.get(currentState);
         TextureRegion[] frames = clip.getFrame();
         int qtd = clip.getQtdFrames();
@@ -57,7 +58,7 @@ public class CombatForm<T extends Attack> {
                 progress = 0;
             }
             clip.setImage(frames[Math.round(progress)]);
-            progress += clip.getOffsetFrames();
+            progress += clip.getOffsetFrames() * GameConstants.REFERENCE_FPS * delta;
             return;
         }
 
@@ -69,7 +70,7 @@ public class CombatForm<T extends Attack> {
             return;
         }
         clip.setImage(frames[Math.round(progress)]);
-        progress += clip.getOffsetFrames();
+        progress += clip.getOffsetFrames() * GameConstants.REFERENCE_FPS * delta;
     }
 
     public boolean isDeathAnimationFinished() {

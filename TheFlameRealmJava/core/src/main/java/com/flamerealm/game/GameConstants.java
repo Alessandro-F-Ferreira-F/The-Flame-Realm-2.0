@@ -183,8 +183,20 @@ public final class GameConstants {
     public static final Vector2 leftPoint = new Vector2(125, 1000);
     public static final Vector2 highPoint = new Vector2(1150, 170);
 
+    /**
+     * FPS de referencia do port original (Pygame/clock.tick 60). Os offsets de
+     * animacao foram calibrados como "frames por frame renderizado" a 60 fps;
+     * multiplicar por REFERENCE_FPS * delta preserva a velocidade original em
+     * qualquer refresh rate.
+     */
+    public static final float REFERENCE_FPS = 60f;
+
+    /** Passo maximo de simulacao (evita saltos gigantes apos um stutter/breakpoint). */
+    public static final float MAX_DELTA = 1f / 30f;
+
     // 6.2 - Speed
-    public static final float mapSpeed = 6f;
+    public static final float mapSpeed = 6f;                                  // px por frame a 60 fps (mantido p/ referencia)
+    public static final float mapSpeedPerSecond = mapSpeed * REFERENCE_FPS;   // 360 px/s
     public static final float tolerance = mapSpeed * 0.5f; // will be used to test which point the player is close to
 
     // 7 - stats

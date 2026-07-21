@@ -34,6 +34,7 @@ public final class CoreAssets implements AssetGroup {
             "Images/Characters/Player/main character (walking right).png",
             "Images/Characters/Player/main character (walking left).png",
             "Images/Characters/Player/BlueMageGuardian.png",
+            "Images/Characters/Player/BlueMageMoveset.png",
 
             "Images/Gamemaps/GameMap.png",
 

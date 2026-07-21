@@ -3,6 +3,7 @@ package com.flamerealm.game.assets;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.flamerealm.game.Assets;
 import com.flamerealm.game.animation.AnimState;
 import com.flamerealm.game.animation.AnimatedEntity;
@@ -35,11 +36,20 @@ public final class SpecEncounterManifest implements EncounterManifest {
     public SpecEncounterManifest(EnemySpec spec) {
         this.spec = spec;
         this.descriptors = new Array<>();
+        ObjectSet<String> seen = new ObjectSet<>();
+
         for (AnimationSpec clip : spec.body().states().values()) {
-            descriptors.add(new AssetDescriptor<>(clip.sheetPath(), Texture.class));
+            addOnce(seen, clip.sheetPath());
         }
         for (BossAttackSpec atk : spec.attacks()) {
-            descriptors.add(new AssetDescriptor<>(atk.clip().sheetPath(), Texture.class));
+            addOnce(seen, atk.clip().sheetPath());
+        }
+    }
+
+    /** Um descriptor por arquivo: o refcount do AssetManager conta 1 por grupo. */
+    private void addOnce(ObjectSet<String> seen, String path) {
+        if (seen.add(path)) {
+            descriptors.add(new AssetDescriptor<>(path, Texture.class));
         }
     }
 
@@ -60,6 +70,6 @@ public final class SpecEncounterManifest implements EncounterManifest {
 
         GameText bossHpText = UiFactory.text(assets, combatScreenFont, combatScreenTextSize, white, "HP: " + spec.maxHp());
 
-        return new CombatEncounter(boss, atks, bossHpText, spec.maxHp(), descriptors);
+        return new CombatEncounter(boss, bossHpText, spec.maxHp(), descriptors);
     }
 }

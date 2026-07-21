@@ -2,6 +2,7 @@ package com.flamerealm.game.instances;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.Assets;
 import com.flamerealm.game.animation.AnimState;
@@ -269,9 +270,16 @@ public class GameInstances {
 
         playerObject = new CharacterEntity(playerSpriteUp, playerMoveFrames, playerSize, playerPosition, playerOffset);
 
-        CombatBodySpec playerBody = new CombatBodySpec(combatFormPosition,
-                Map.of(AnimState.IDLE, new AnimationSpec("Images/Characters/Player/BlueMageGuardian.png",
-                        combatFormFrames, combatFormSize, combatFormOffset)));
+        // Player usando o BlueMageMoveset (recolor do Necromancer sheet) com moveset completo.
+        // Celula 128x128 = mesmo modelo do BlueMageGuardian original (combatFormSize);
+        // as fileiras da sheet seguem o layout do Necromancer (IDLE/ATTACK/HURT/DEATH).
+        String playerSheet = "Images/Characters/Player/BlueMageMoveset.png";
+        GridPoint2 playerCell = combatFormSize;
+        CombatBodySpec playerBody = new CombatBodySpec(combatFormPosition, Map.of(
+                AnimState.IDLE, new AnimationSpec(playerSheet, 8, playerCell, 0.12f, new GridPoint2(0, 0)),
+                AnimState.ATTACK, new AnimationSpec(playerSheet, 13, playerCell, 0.2f, new GridPoint2(0, 256)),
+                AnimState.HURT, new AnimationSpec(playerSheet, 5, playerCell, 0.2f, new GridPoint2(0, 640)),
+                AnimState.DEATH, new AnimationSpec(playerSheet, 9, playerCell, 0.175f, new GridPoint2(0, 768))));
         playerCombatForm = new PlayerCombatForm(playerBody.position(), playerBody.buildClips(assets),
                 playerHp, playerAtkList, playerMana);
 

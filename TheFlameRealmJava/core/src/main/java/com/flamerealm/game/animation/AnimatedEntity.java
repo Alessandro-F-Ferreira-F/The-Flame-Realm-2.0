@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.flamerealm.game.GameConstants;
 
 /**
  * Port de AnimatedSprite.py.
@@ -56,12 +57,12 @@ public class AnimatedEntity {
         this.position = spritePosition;
     }
 
-    public void update() {
+    public void update(float delta) {
         if (atual > getQtdFrames() - 1) {
             atual = 0;
         }
         image = frame[Math.round(atual)];
-        atual += getOffsetFrames();
+        atual += getOffsetFrames() * GameConstants.REFERENCE_FPS * delta;
     }
 
     public TextureRegion[] getFrame() {

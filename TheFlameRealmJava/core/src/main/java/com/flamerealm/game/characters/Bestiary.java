@@ -17,11 +17,15 @@ public final class Bestiary {
     private Bestiary() {}
 
     private static final String NECROMANCER_SHEET = "Images/Characters/Boss/Necromancer_creativekind-Sheet.png";
+    private static final String THEAD_DARKUS_SHEET = "Images/Characters/Boss/Thead Darkus.png";
 
     public static final EnemySpec THEAD_DARKUS = new EnemySpec("Thead Darkus", 400,
-            new CombatBodySpec(new Vector2(0, SCREEN_HEIGHT * 0.3f),
-                    Map.of(AnimState.IDLE, new AnimationSpec("Images/Characters/Boss/Thead Darkus.png",
-                            15, new GridPoint2(224, 240), 0.18f))),
+            new CombatBodySpec(new Vector2(0, SCREEN_HEIGHT * 0.3f), Map.of(
+                    AnimState.IDLE, new AnimationSpec(THEAD_DARKUS_SHEET, 8, new GridPoint2(270, 270), 0.12f, new GridPoint2(0, 0)),
+                    AnimState.ATTACK, new AnimationSpec(THEAD_DARKUS_SHEET, 13, new GridPoint2(270, 270), 0.2f, new GridPoint2(0, 270)),
+                    AnimState.HURT, new AnimationSpec(THEAD_DARKUS_SHEET, 5, new GridPoint2(270, 270), 0.2f, new GridPoint2(0, 540)),
+                    AnimState.DEATH, new AnimationSpec(THEAD_DARKUS_SHEET, 9, new GridPoint2(270, 270), 0.175f, new GridPoint2(0, 810))
+            )),
             List.of(
                     new BossAttackSpec("Flamelash", 10, 70, 3,
                             new AnimationSpec("Images/Attacks/Boss/Flamelash.png", 45, new GridPoint2(100, 100), 0.6f),
@@ -40,9 +44,9 @@ public final class Bestiary {
     public static final EnemySpec NECROMANCER = new EnemySpec("Necromancer", 400,
             new CombatBodySpec(new Vector2(0, SCREEN_HEIGHT * 0.3f), Map.of(
                     AnimState.IDLE, new AnimationSpec(NECROMANCER_SHEET, 8, new GridPoint2(160, 128), 0.18f, new GridPoint2(0, 0)),
-                    AnimState.ATTACK, new AnimationSpec(NECROMANCER_SHEET, 13, new GridPoint2(160, 128), 0.3f, new GridPoint2(0, 256)),
-                    AnimState.HURT, new AnimationSpec(NECROMANCER_SHEET, 5, new GridPoint2(160, 128), 0.3f, new GridPoint2(0, 640)),
-                    AnimState.DEATH, new AnimationSpec(NECROMANCER_SHEET, 9, new GridPoint2(160, 128), 0.25f, new GridPoint2(0, 768))
+                    AnimState.ATTACK, new AnimationSpec(NECROMANCER_SHEET, 13, new GridPoint2(160, 128), 0.2f, new GridPoint2(0, 256)),
+                    AnimState.HURT, new AnimationSpec(NECROMANCER_SHEET, 5, new GridPoint2(160, 128), 0.2f, new GridPoint2(0, 640)),
+                    AnimState.DEATH, new AnimationSpec(NECROMANCER_SHEET, 9, new GridPoint2(160, 128), 0.175f, new GridPoint2(0, 768))
             )),
             List.of(
                     new BossAttackSpec("Soul Flame", 10, 70, 3,

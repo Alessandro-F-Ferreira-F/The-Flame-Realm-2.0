@@ -22,6 +22,7 @@ public class PlayScreen extends BaseScreen {
     private boolean moveDown;
     private boolean moveLeft;
     private boolean moveRight;
+    private boolean atFightPoint;
 
     public PlayScreen(FlameRealmGame game) {
         super(game);
@@ -81,6 +82,63 @@ public class PlayScreen extends BaseScreen {
     }
 
     @Override
+    protected boolean update(float delta) {
+        float dt = Math.min(delta, GameConstants.MAX_DELTA);
+
+        if (instances.playerObject.getMoving()) {
+            instances.playerObject.update(dt);
+            float step = currentMapOffset * GameConstants.REFERENCE_FPS * dt;
+            if (verticalMoving) {
+                instances.gameMap.getCurrentPoint().setPoint(new Vector2(
+                        instances.gameMap.getCurrentPoint().getPoint().x,
+                        instances.gameMap.getCurrentPoint().getPoint().y + step));
+            } else {
+                instances.gameMap.getCurrentPoint().setPoint(new Vector2(
+                        instances.gameMap.getCurrentPoint().getPoint().x + step,
+                        instances.gameMap.getCurrentPoint().getPoint().y));
+            }
+
+            // Tolerancia proporcional ao passo real deste frame: com passo variavel, uma
+            // janela fixa pode ser atravessada inteira num frame lento e o FightPoint
+            // nunca dispararia.
+            instances.gameMap.setTol(Math.max(GameConstants.tolerance, Math.abs(step) * 0.5f));
+        } else {
+            instances.playerObject.setImage(instances.playerObject.getFrame()[1]);
+        }
+
+        atFightPoint = instances.gameMap.fightPointTest();
+        if (!atFightPoint) {
+            return false;
+        }
+
+        moveUp = false;
+        moveDown = false;
+        moveLeft = false;
+        moveRight = false;
+        instances.playerObject.setMoving(false);
+
+        if (instances.gameMap.getCurrentPoint().getActivated()) {
+            EncounterManifest manifest = instances.gameMap.getCurrentPoint().getManifest();
+            game.loading.begin(
+                    () -> assets.queue(manifest.descriptors()),
+                    () -> game.combat.setEncounter(manifest.build(assets)),
+                    () -> game.combat);
+            game.setScreen(game.loading);
+            return true; // aborta o frame: nao desenha por cima da tela nova
+        }
+
+        instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
+
+        List<String> allowedDirections = instances.gameMap.getCurrentPoint().getAllowedDirections();
+        moveUp = allowedDirections.contains("UP");
+        moveDown = allowedDirections.contains("DOWN");
+        moveRight = allowedDirections.contains("RIGHT");
+        moveLeft = allowedDirections.contains("LEFT");
+
+        return false;
+    }
+
+    @Override
     protected void draw(float delta) {
         Vector2 currentPos = instances.gameMap.getCurrentPoint().getPoint();
         TextureRegion mapRegion = new TextureRegion(instances.gameMap.getImage(),
@@ -94,57 +152,12 @@ public class PlayScreen extends BaseScreen {
 
         instances.pauseButton.draw(batch);
 
-        if (instances.playerObject.getMoving()) {
-            instances.playerObject.update();
-            if (verticalMoving) {
-                instances.gameMap.getCurrentPoint().setPoint(new Vector2(
-                        instances.gameMap.getCurrentPoint().getPoint().x,
-                        instances.gameMap.getCurrentPoint().getPoint().y + currentMapOffset));
-            } else {
-                instances.gameMap.getCurrentPoint().setPoint(new Vector2(
-                        instances.gameMap.getCurrentPoint().getPoint().x + currentMapOffset,
-                        instances.gameMap.getCurrentPoint().getPoint().y));
-            }
-        } else {
-            instances.playerObject.setImage(instances.playerObject.getFrame()[1]);
+        if (!atFightPoint) {
+            return;
         }
-
-        if (instances.gameMap.fightPointTest()) {
-            moveUp = false;
-            moveDown = false;
-            moveLeft = false;
-            moveRight = false;
-            instances.playerObject.setMoving(false);
-
-            if (instances.gameMap.getCurrentPoint().getActivated()) {
-                EncounterManifest manifest = instances.gameMap.getCurrentPoint().getManifest();
-                game.loading.begin(
-                        () -> assets.queue(manifest.descriptors()),
-                        () -> game.combat.setEncounter(manifest.build(assets)),
-                        () -> game.combat);
-                game.setScreen(game.loading);
-            } else {
-                instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
-            }
-
-            List<String> allowedDirections = instances.gameMap.getCurrentPoint().getAllowedDirections();
-
-            if (allowedDirections.contains("UP")) {
-                instances.moveUpButton.draw(batch);
-                moveUp = true;
-            }
-            if (allowedDirections.contains("DOWN")) {
-                instances.moveDownButton.draw(batch);
-                moveDown = true;
-            }
-            if (allowedDirections.contains("RIGHT")) {
-                instances.moveRightButton.draw(batch);
-                moveRight = true;
-            }
-            if (allowedDirections.contains("LEFT")) {
-                instances.moveLeftButton.draw(batch);
-                moveLeft = true;
-            }
-        }
+        if (moveUp)    instances.moveUpButton.draw(batch);
+        if (moveDown)  instances.moveDownButton.draw(batch);
+        if (moveRight) instances.moveRightButton.draw(batch);
+        if (moveLeft)  instances.moveLeftButton.draw(batch);
     }
 }

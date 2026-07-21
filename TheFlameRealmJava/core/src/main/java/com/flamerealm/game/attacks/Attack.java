@@ -3,6 +3,7 @@ package com.flamerealm.game.attacks;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
+import com.flamerealm.game.GameConstants;
 import com.flamerealm.game.animation.AnimatedEntity;
 
 /**
@@ -27,13 +28,13 @@ public class Attack extends AnimatedEntity {
     }
 
     @Override
-    public void update() {
+    public void update(float delta) {
         if (loopsCompletos >= limiteLoops) {
             loopsCompletos = 0;
             isOver = true;
         } else {
             image = frame[Math.round(atual)];
-            atual += getOffsetFrames();
+            atual += getOffsetFrames() * GameConstants.REFERENCE_FPS * delta;
             if (atual > getQtdFrames() - 1) {
                 atual = 0;
                 loopsCompletos++;

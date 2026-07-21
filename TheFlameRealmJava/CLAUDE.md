@@ -64,6 +64,21 @@ Comandos:
   libGDX (yUp) sem avaliar o impacto em todas as telas.
 - Todo desenho passa por um único `SpriteBatch` compartilhado (`game.batch`),
   entre `batch.begin()` e `batch.end()`.
+- **Todo avanço de animação/movimento usa `update(float delta)`**, nunca frame
+  fixo. `AnimatedEntity`, `Attack` e `CombatForm` avançam
+  `offsetFrames * GameConstants.REFERENCE_FPS * delta` (não mais `+= offsetFrames`
+  por frame renderizado) — isso preserva a velocidade calibrada a 60 fps
+  independente do refresh rate. `PlayScreen`/`CombatScreen` seguem o Template
+  Method do `BaseScreen` (`handleInput` → `update(delta)` → `draw(delta)`):
+  toda mutação de estado de mundo (posição, animação, transição de tela) vai em
+  `update`; `draw` só desenha.
+- `Assets.queue`/`Assets.unload` **não têm guarda de `isLoaded`** de propósito:
+  o `AssetManager` já faz contagem de referência, e um guarda unilateral
+  quebraria a simetria incremento/decremento para assets compartilhados entre
+  grupos (núcleo + encontro, ou dois encontros). Pré-condição: cada `fileName`
+  aparece no máximo uma vez por lista de descriptors (ver dedup em
+  `SpecEncounterManifest`). Liberar um `CombatEncounter` deve ir por
+  `encounter.release(assets)` (idempotente), não por `assets.unload(...)` direto.
 - `GameText.draw(batch, x, y)` desenha a partir de (x, y); hoje as coordenadas
   são percentuais "calibrados no olho" (ex.: `SCREEN_WIDTH * 0.4f`), não
   centralização real medida.
