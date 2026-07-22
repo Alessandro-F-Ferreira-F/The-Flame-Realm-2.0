@@ -271,15 +271,15 @@ public class GameInstances {
         playerObject = new CharacterEntity(playerSpriteUp, playerMoveFrames, playerSize, playerPosition, playerOffset);
 
         // Player usando o BlueMageMoveset (recolor do Necromancer sheet) com moveset completo.
-        // Celula 128x128 = mesmo modelo do BlueMageGuardian original (combatFormSize);
-        // as fileiras da sheet seguem o layout do Necromancer (IDLE/ATTACK/HURT/DEATH).
+        // Sheet padronizada em celulas 300x300 / 4 fileiras (IDLE/ATTACK/HURT/DEATH),
+        // igual as variantes White/Purple/Thead/Necromancer.
         String playerSheet = "Images/Characters/Player/BlueMageMoveset.png";
-        GridPoint2 playerCell = combatFormSize;
+        GridPoint2 playerCell = new GridPoint2(300, 300);
         CombatBodySpec playerBody = new CombatBodySpec(combatFormPosition, Map.of(
                 AnimState.IDLE, new AnimationSpec(playerSheet, 8, playerCell, 0.12f, new GridPoint2(0, 0)),
-                AnimState.ATTACK, new AnimationSpec(playerSheet, 13, playerCell, 0.2f, new GridPoint2(0, 256)),
-                AnimState.HURT, new AnimationSpec(playerSheet, 5, playerCell, 0.2f, new GridPoint2(0, 640)),
-                AnimState.DEATH, new AnimationSpec(playerSheet, 9, playerCell, 0.175f, new GridPoint2(0, 768))));
+                AnimState.ATTACK, new AnimationSpec(playerSheet, 13, playerCell, 0.2f, new GridPoint2(0, 300)),
+                AnimState.HURT, new AnimationSpec(playerSheet, 5, playerCell, 0.2f, new GridPoint2(0, 600)),
+                AnimState.DEATH, new AnimationSpec(playerSheet, 9, playerCell, 0.175f, new GridPoint2(0, 900))));
         playerCombatForm = new PlayerCombatForm(playerBody.position(), playerBody.buildClips(assets),
                 playerHp, playerAtkList, playerMana);
 
@@ -288,13 +288,15 @@ public class GameInstances {
 
         EncounterManifest theadDarkusManifest = new SpecEncounterManifest(Bestiary.THEAD_DARKUS);
         EncounterManifest necromancerManifest = new SpecEncounterManifest(Bestiary.NECROMANCER);
+        EncounterManifest whiteNecromancerManifest = new SpecEncounterManifest(Bestiary.WHITE_NECROMANCER);
+        EncounterManifest purpleNecromancerManifest = new SpecEncounterManifest(Bestiary.PURPLE_NECROMANCER);
 
         startPoint = new FightPoint(new Vector2(downPoint), Arrays.asList("UP"), false, null);
         centralFightPoint = new FightPoint(new Vector2(centralPoint), Arrays.asList("UP", "DOWN", "LEFT", "RIGHT"),
-                true, theadDarkusManifest);
-        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, necromancerManifest);
-        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, theadDarkusManifest);
-        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, theadDarkusManifest);
+                true, necromancerManifest);
+        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, theadDarkusManifest);
+        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, purpleNecromancerManifest);
+        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, whiteNecromancerManifest);
 
         List<FightPoint> gameMapPoints = Arrays.asList(startPoint, centralFightPoint, rightFightPoint, leftFightPoint, highFightPoint);
         gameMap = new GameMap(gameMapImage, gameMapPoints, tolerance);

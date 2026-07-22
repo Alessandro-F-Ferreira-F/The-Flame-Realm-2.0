@@ -117,7 +117,7 @@ public final class GameConstants {
     public static final float playerOffset = 0.1f;
 
     // 4.4 Positions (top-left of the images)
-    public static final Vector2 combatFormPosition = new Vector2(SCREEN_WIDTH * 0.8f, SCREEN_HEIGHT * 0.5f);
+    public static final Vector2 combatFormPosition = new Vector2(SCREEN_WIDTH * 0.7f, SCREEN_HEIGHT * 0.28f);
     public static final Vector2 playerPosition = new Vector2(SCREEN_WIDTH / 2f - playerSize.x / 2f, SCREEN_HEIGHT / 2f - playerSize.y / 2f);
 
     // 5 - Attacks parameters
