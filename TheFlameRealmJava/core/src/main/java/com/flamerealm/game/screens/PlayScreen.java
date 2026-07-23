@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.GameConstants;
 import com.flamerealm.game.assets.EncounterManifest;
+import com.flamerealm.game.gamemap.Direction;
 
 import java.util.List;
 
@@ -129,11 +130,11 @@ public class PlayScreen extends BaseScreen {
 
         instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
 
-        List<String> allowedDirections = instances.gameMap.getCurrentPoint().getAllowedDirections();
-        moveUp = allowedDirections.contains("UP");
-        moveDown = allowedDirections.contains("DOWN");
-        moveRight = allowedDirections.contains("RIGHT");
-        moveLeft = allowedDirections.contains("LEFT");
+        List<Direction> allowedDirections = instances.gameMap.getCurrentPoint().getAllowedDirections();
+        moveUp = allowedDirections.contains(Direction.UP);
+        moveDown = allowedDirections.contains(Direction.DOWN);
+        moveRight = allowedDirections.contains(Direction.RIGHT);
+        moveLeft = allowedDirections.contains(Direction.LEFT);
 
         return false;
     }

@@ -11,19 +11,19 @@ import java.util.List;
  */
 public class FightPoint {
     private Vector2 point;
-    private List<String> allowedDirections;
+    private List<Direction> allowedDirections;
     private boolean activated;
     private EncounterManifest manifest;
 
-    public FightPoint(Vector2 point, List<String> allowedDirections) {
+    public FightPoint(Vector2 point, List<Direction> allowedDirections) {
         this(point, allowedDirections, true, null);
     }
 
-    public FightPoint(Vector2 point, List<String> allowedDirections, boolean activated) {
+    public FightPoint(Vector2 point, List<Direction> allowedDirections, boolean activated) {
         this(point, allowedDirections, activated, null);
     }
 
-    public FightPoint(Vector2 point, List<String> allowedDirections, boolean activated, EncounterManifest manifest) {
+    public FightPoint(Vector2 point, List<Direction> allowedDirections, boolean activated, EncounterManifest manifest) {
         this.point = point;
         this.allowedDirections = allowedDirections;
         this.activated = activated;
@@ -46,11 +46,11 @@ public class FightPoint {
         this.point = point;
     }
 
-    public List<String> getAllowedDirections() {
+    public List<Direction> getAllowedDirections() {
         return allowedDirections;
     }
 
-    public void setAllowedDirections(List<String> allowedDirections) {
+    public void setAllowedDirections(List<Direction> allowedDirections) {
         this.allowedDirections = allowedDirections;
     }
 

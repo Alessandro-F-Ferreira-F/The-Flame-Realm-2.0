@@ -15,6 +15,7 @@ import com.flamerealm.game.characters.Bestiary;
 import com.flamerealm.game.characters.CharacterEntity;
 import com.flamerealm.game.characters.CombatBodySpec;
 import com.flamerealm.game.characters.PlayerCombatForm;
+import com.flamerealm.game.gamemap.Direction;
 import com.flamerealm.game.gamemap.FightPoint;
 import com.flamerealm.game.gamemap.GameMap;
 import com.flamerealm.game.ui.GameText;
@@ -291,12 +292,13 @@ public class GameInstances {
         EncounterManifest icePhantonManifest = new SpecEncounterManifest(Bestiary.ICE_PHANTON);
         EncounterManifest darkPhantonManifest = new SpecEncounterManifest(Bestiary.DARK_PHANTON);
 
-        startPoint = new FightPoint(new Vector2(downPoint), Arrays.asList("UP"), false, null);
-        centralFightPoint = new FightPoint(new Vector2(centralPoint), Arrays.asList("UP", "DOWN", "LEFT", "RIGHT"),
+        startPoint = new FightPoint(new Vector2(downPoint), Arrays.asList(Direction.UP), false, null);
+        centralFightPoint = new FightPoint(new Vector2(centralPoint),
+                Arrays.asList(Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT),
                 true, necromancerManifest);
-        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, darkPhantonManifest);
-        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, firePhantonManifest);
-        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, icePhantonManifest);
+        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList(Direction.LEFT), true, darkPhantonManifest);
+        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList(Direction.RIGHT), true, firePhantonManifest);
+        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList(Direction.DOWN), true, icePhantonManifest);
 
         List<FightPoint> gameMapPoints = Arrays.asList(startPoint, centralFightPoint, rightFightPoint, leftFightPoint, highFightPoint);
         gameMap = new GameMap(gameMapImage, gameMapPoints, tolerance);

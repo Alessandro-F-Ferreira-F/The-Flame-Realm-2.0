@@ -107,7 +107,7 @@ public final class Bestiary {
                             new AnimationSpec("Images/Attacks/Boss/Thead Darkus/DarkVortex.png", 60, new GridPoint2(128, 128), 0.9f),
                             new Vector2(SCREEN_WIDTH * 0.848f, SCREEN_HEIGHT * 0.55f)),
                     new BossAttackSpec("Dark Skull", 100, 100, 1,
-                            new AnimationSpec("Images/Attacks/Boss//Thead Darkus/DarkSkull.png", 15, new GridPoint2(64, 64), 0.2f),
+                            new AnimationSpec("Images/Attacks/Boss/Thead Darkus/DarkSkull.png", 15, new GridPoint2(64, 64), 0.2f),
                             new Vector2(SCREEN_WIDTH * 0.8f, SCREEN_HEIGHT * 0.45f))
             ));
 }
