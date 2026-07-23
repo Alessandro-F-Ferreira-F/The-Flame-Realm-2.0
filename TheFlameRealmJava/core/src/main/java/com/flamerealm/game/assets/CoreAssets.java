@@ -23,7 +23,7 @@ public final class CoreAssets implements AssetGroup {
             "Images/Interface/Buttons/Pause Button/WhitePauseButton.png",
 
             "Images/Attacks/Player/Azuring Impact.png",
-            "Images/Attacks/Player/Nebula.png",
+            "Images/Attacks/Player/Anima.png",
             "Images/Attacks/Player/Dual Vortex.png",
             "Images/Attacks/Player/Razor.png",
 

@@ -139,13 +139,13 @@ public final class GameConstants {
     // 5.1.3 - Dimensions (in pixels)
     public static final GridPoint2 vortexPixels = new GridPoint2(128, 128);
     public static final GridPoint2 azuringPixels = new GridPoint2(100, 100);
-    public static final GridPoint2 nebulaPixels = new GridPoint2(40, 40);
+    public static final GridPoint2 nebulaPixels = new GridPoint2(100, 100);
     public static final GridPoint2 razorPixels = new GridPoint2(40, 40);
 
     // 5.1.4 - Number of frames
     public static final int vortexFrames = 46;
     public static final int azuringFrames = 80;
-    public static final int nebulaFrames = 61;
+    public static final int nebulaFrames = 60;
     public static final int razorFrames = 60;
 
     // 5.1.5 - Positions

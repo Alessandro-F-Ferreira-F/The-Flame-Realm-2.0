@@ -97,6 +97,12 @@ public class AnimatedEntity {
         position = pos;
     }
 
+    public void centerOn(float cx, float cy) {
+        position.set(
+                cx - image.getRegionWidth() / 2f,
+                cy - image.getRegionHeight() / 2f);
+    }
+
     public TextureRegion getImage() {
         return image;
     }

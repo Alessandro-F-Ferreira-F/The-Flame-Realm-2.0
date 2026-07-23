@@ -244,7 +244,7 @@ public class GameInstances {
         azuring = new PlayerAttack("Azuring Impact", azuringDamage, azuringSprite, azuringLoops, azuringFrames,
                 azuringPixels, azuringPosition, azuringOffset, azuringMana, azuringButton);
 
-        Texture nebulaSprite = assets.texture("Images/Attacks/Player/Nebula.png");
+        Texture nebulaSprite = assets.texture("Images/Attacks/Player/Anima.png");
         nebula = new PlayerAttack("Nebula Crystal", nebulaDamage, nebulaSprite, nebulaLoops, nebulaFrames,
                 nebulaPixels, nebulaPosition, nebulaOffset, nebulaMana, nebulaButton);
 
@@ -286,17 +286,17 @@ public class GameInstances {
         // 5 - Game map
         gameMapImage = assets.texture("Images/Gamemaps/GameMap.png");
 
-        EncounterManifest theadDarkusManifest = new SpecEncounterManifest(Bestiary.THEAD_DARKUS);
+        EncounterManifest firePhantonManifest = new SpecEncounterManifest(Bestiary.FIRE_PHANTON);
         EncounterManifest necromancerManifest = new SpecEncounterManifest(Bestiary.NECROMANCER);
-        EncounterManifest whiteNecromancerManifest = new SpecEncounterManifest(Bestiary.WHITE_NECROMANCER);
-        EncounterManifest purpleNecromancerManifest = new SpecEncounterManifest(Bestiary.PURPLE_NECROMANCER);
+        EncounterManifest icePhantonManifest = new SpecEncounterManifest(Bestiary.ICE_PHANTON);
+        EncounterManifest darkPhantonManifest = new SpecEncounterManifest(Bestiary.DARK_PHANTON);
 
         startPoint = new FightPoint(new Vector2(downPoint), Arrays.asList("UP"), false, null);
         centralFightPoint = new FightPoint(new Vector2(centralPoint), Arrays.asList("UP", "DOWN", "LEFT", "RIGHT"),
                 true, necromancerManifest);
-        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, theadDarkusManifest);
-        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, purpleNecromancerManifest);
-        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, whiteNecromancerManifest);
+        rightFightPoint = new FightPoint(new Vector2(rightPoint), Arrays.asList("LEFT"), true, darkPhantonManifest);
+        leftFightPoint = new FightPoint(new Vector2(leftPoint), Arrays.asList("RIGHT"), true, firePhantonManifest);
+        highFightPoint = new FightPoint(new Vector2(highPoint), Arrays.asList("DOWN"), true, icePhantonManifest);
 
         List<FightPoint> gameMapPoints = Arrays.asList(startPoint, centralFightPoint, rightFightPoint, leftFightPoint, highFightPoint);
         gameMap = new GameMap(gameMapImage, gameMapPoints, tolerance);

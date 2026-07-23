@@ -2,6 +2,7 @@ package com.flamerealm.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.GameConstants;
 import com.flamerealm.game.animation.AnimState;
@@ -58,6 +59,8 @@ public class CombatScreen extends BaseScreen {
             turnoAtual = Turn.ENEMY;
             elapsedSinceLastClick = 0f;
             playerLastAtk.setIsOver(false);
+            Vector2 alvo = encounter.boss.getCenter();
+            playerLastAtk.centerOn(alvo.x, alvo.y);
             playerLastAtk.getAtkButton().getText().setMessage(playerLastAtk.getName() + "\nDamage/Uses: "
                     + playerLastAtk.getDamage() + "/" + playerLastAtk.getMana());
             instances.playerCombatForm.setManaPoints(instances.playerCombatForm.getManaPoints() - playerLastAtk.getMana());
@@ -149,6 +152,8 @@ public class CombatScreen extends BaseScreen {
                 enemyLastAtk = encounter.boss.randomizeAtk();
                 enemyLastAtk.randomizeHitKill();
                 enemyLastAtk.setIsOver(false);
+                Vector2 alvo = instances.playerCombatForm.getCenter();
+                enemyLastAtk.centerOn(alvo.x, alvo.y);
 
                 instances.playerCombatForm.setHealthPoints(instances.playerCombatForm.getHealthPoints() - enemyLastAtk.getDamage());
                 instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());

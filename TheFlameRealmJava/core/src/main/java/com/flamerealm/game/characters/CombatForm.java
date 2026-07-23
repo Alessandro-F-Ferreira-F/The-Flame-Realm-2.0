@@ -89,6 +89,13 @@ public class CombatForm<T extends Attack> {
         return position;
     }
 
+    public Vector2 getCenter() {
+        TextureRegion img = getImage();
+        return new Vector2(
+                position.x + img.getRegionWidth() / 2f,
+                position.y + img.getRegionHeight() / 2f);
+    }
+
     public T randomizeAtk() {
         int randomizer = MathUtils.random(0, atkList.size() - 1);
         return atkList.get(randomizer);
