@@ -23,14 +23,13 @@ public class HistoryScreen extends BaseScreen {
 
     @Override
     protected boolean handleInput() {
+        if (clickFirst(instances.nav.returnToMainMenuButton)) {
+            return true;
+        }
         if (!Gdx.input.justTouched()) {
             return false;
         }
-        if (instances.returnToMainMenuButton.mouseInButton()) {
-            game.setScreen(game.mainMenu);
-            return true;
-        }
-        if (instances.secretButton.mouseInButton()) {
+        if (instances.story.secretButton.mouseInButton()) {
             secretReveal = !secretReveal;
         }
         return false;
@@ -38,15 +37,15 @@ public class HistoryScreen extends BaseScreen {
 
     @Override
     protected void draw(float delta) {
-        instances.historyText.drawWrapped(batch, TextAlign.CENTER,
+        instances.story.historyText.drawWrapped(batch, TextAlign.CENTER,
                 GameConstants.SCREEN_WIDTH * 0.05f, GameConstants.SCREEN_HEIGHT * 0.1f, GameConstants.SCREEN_WIDTH * 0.9f);
 
-        instances.secretButton.getText().setColor(secretReveal ? GameConstants.red : GameConstants.black);
-        if (instances.secretButton.mouseInButton()) {
-            instances.historySecretText.drawWrapped(batch, TextAlign.CENTER,
+        instances.story.secretButton.getText().setColor(secretReveal ? GameConstants.red : GameConstants.black);
+        if (instances.story.secretButton.mouseInButton()) {
+            instances.story.historySecretText.drawWrapped(batch, TextAlign.CENTER,
                     GameConstants.SCREEN_WIDTH * 0.05f, GameConstants.secretTextPosition.y, GameConstants.SCREEN_WIDTH * 0.9f);
         }
 
-        instances.returnToMainMenuButton.draw(batch);
+        instances.nav.returnToMainMenuButton.draw(batch);
     }
 }

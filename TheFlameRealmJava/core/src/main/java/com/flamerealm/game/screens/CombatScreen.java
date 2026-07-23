@@ -2,192 +2,83 @@ package com.flamerealm.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Vector2;
 import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.GameConstants;
-import com.flamerealm.game.animation.AnimState;
 import com.flamerealm.game.attacks.BossAttack;
 import com.flamerealm.game.attacks.PlayerAttack;
+import com.flamerealm.game.combat.CombatController;
+import com.flamerealm.game.combat.CombatOutcome;
 import com.flamerealm.game.instances.CombatEncounter;
 
 /**
- * Port do bloco "Combat screen" de main.py: combate por turnos entre
- * playerCombatForm e theadDarkus. elapsedSinceLastClick substitui o
- * time.time()-lastClick do Python por um acumulador de delta, que so avanca
- * enquanto esta tela esta ativa - exatamente como o bloco Python so rodava
- * dentro do elif booleans.getCombatScreen().
+ * Port do bloco "Combat screen" de main.py: casca fina que dirige um
+ * CombatController (dono da regra de turno/timers/vitoria/derrota) e cuida
+ * so de input bruto, navegacao entre telas e desenho.
  */
 public class CombatScreen extends BaseScreen {
-    private static final float WAIT_TIME = 11f;
-
-    private enum Turn { PLAYER, ENEMY }
-
-    private Turn turnoAtual = Turn.PLAYER;
-    private PlayerAttack playerLastAtk;
-    private BossAttack enemyLastAtk;
-    private float elapsedSinceLastClick = WAIT_TIME + 1f;
-    private boolean usedFuryOfTheEye;
-    private CombatEncounter encounter;
+    private final CombatController controller;
 
     public CombatScreen(FlameRealmGame game) {
         super(game);
+        controller = new CombatController(instances, assets);
     }
 
     /**
      * Chamado pela LoadingScreen (postLoadJob) antes desta tela virar ativa.
-     * Este e o unico seam de inicio de encontro: todo estado de escopo de encontro
-     * (turno, timers, ultimo ataque, uso do Fury) nasce aqui.
+     * Delega ao controller, unico dono do estado de escopo de encontro.
      */
     public void setEncounter(CombatEncounter encounter) {
-        this.encounter = encounter;
-        this.turnoAtual = Turn.PLAYER;
-        this.playerLastAtk = null;
-        this.enemyLastAtk = null;
-        this.elapsedSinceLastClick = WAIT_TIME + 1f;
-        this.usedFuryOfTheEye = false;
+        controller.setEncounter(encounter);
     }
 
     @Override
     protected boolean handleInput() {
-        if (!Gdx.input.justTouched() || turnoAtual != Turn.PLAYER) {
-            return false;
+        if (Gdx.input.justTouched()) {
+            controller.handleClick();
         }
-
-        playerLastAtk = instances.playerCombatForm.atkCheck();
-
-        if (playerLastAtk != null && playerLastAtk.getMana() <= instances.playerCombatForm.getManaPoints()) {
-            turnoAtual = Turn.ENEMY;
-            elapsedSinceLastClick = 0f;
-            playerLastAtk.setIsOver(false);
-            Vector2 alvo = encounter.boss.getCenter();
-            playerLastAtk.centerOn(alvo.x, alvo.y);
-            playerLastAtk.getAtkButton().getText().setMessage(playerLastAtk.getName() + "\nDamage/Uses: "
-                    + playerLastAtk.getDamage() + "/" + playerLastAtk.getMana());
-            instances.playerCombatForm.setManaPoints(instances.playerCombatForm.getManaPoints() - playerLastAtk.getMana());
-            encounter.boss.setHealthPoints(encounter.boss.getHealthPoints() - playerLastAtk.getDamage());
-            instances.playerCombatForm.setState(AnimState.ATTACK);
-            encounter.boss.setState(AnimState.HURT);
-
-            instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
-            encounter.bossHpText.setMessage("HP: " + encounter.boss.getHealthPoints());
-        }
-
-        if (instances.secretEyeButton.mouseInButton() && !usedFuryOfTheEye) {
-            encounter.boss.setHealthPoints(encounter.boss.getHealthPoints() - GameConstants.furyOfTheEyeDamage);
-            encounter.bossHpText.setMessage("HP: " + encounter.boss.getHealthPoints());
-            instances.furyOfTheEye.setIsOver(false);
-            usedFuryOfTheEye = true;
-        }
-
         return false;
     }
 
     @Override
     protected boolean update(float delta) {
-        elapsedSinceLastClick += delta;
+        CombatOutcome outcome = controller.update(delta);
+        switch (outcome) {
+            case DEFEAT:
+                game.setScreen(game.death);
+                return true;
 
-        if (usedFuryOfTheEye && !instances.furyOfTheEye.getIsOver()) {
-            instances.furyOfTheEye.update(delta);
+            case VICTORY:
+                CombatEncounter enc = controller.consumeVictoryEncounter();
+                game.loading.beginTransition(
+                        () -> enc.release(assets),
+                        () -> controller.applyVictoryRewards(enc),
+                        () -> game.play);
+                game.setScreen(game.loading);
+                return true;
+
+            default:
+                return false;
         }
-
-        if (elapsedSinceLastClick > WAIT_TIME) {
-            turnoAtual = Turn.PLAYER;
-            enemyLastAtk = null;
-
-            if (instances.playerCombatForm.getHealthPoints() == 0) {
-                instances.playerCombatForm.setState(AnimState.DEATH);
-                if (instances.playerCombatForm.isDeathAnimationFinished()) {
-                    instances.playerCombatForm.revive(GameConstants.playerHp);
-                    instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
-
-                    instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
-                    instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
-
-                    encounter.boss.revive(encounter.maxHp);
-                    encounter.bossHpText.setMessage("HP: " + encounter.maxHp);
-
-                    instances.gameMap.setCurrentPoint(instances.gameMap.getPreviousPoint());
-                    encounter.release(assets);
-                    encounter = null;
-                    game.setScreen(game.death);
-                    return true;
-                }
-            }
-        }
-
-        if (playerLastAtk != null) {
-            if (!playerLastAtk.getIsOver()) {
-                playerLastAtk.update(delta);
-            } else if (encounter.boss.getHealthPoints() == 0) {
-                encounter.boss.setState(AnimState.DEATH);
-                if (encounter.boss.isDeathAnimationFinished()) {
-                    final CombatEncounter enc = encounter;
-                    turnoAtual = Turn.PLAYER;
-
-                    game.loading.beginTransition(
-                            () -> enc.release(assets),
-                            () -> {
-                                instances.playerCombatForm.revive(GameConstants.playerHp);
-                                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
-                                instances.playerCombatForm.setManaPoints(GameConstants.playerMana);
-                                instances.playerCombatFormManaText.setMessage("Mana: " + instances.playerCombatForm.getManaPoints());
-
-                                enc.boss.revive(enc.maxHp);
-                                enc.bossHpText.setMessage("HP: " + enc.maxHp);
-
-                                instances.gameMap.disableCurrentPoint();
-                                instances.gameMap.setPreviousPoint(instances.gameMap.getCurrentPoint());
-                            },
-                            () -> game.play);
-
-                    encounter = null;
-                    game.setScreen(game.loading);
-                    return true;
-                }
-            }
-        }
-
-        if (turnoAtual == Turn.ENEMY && elapsedSinceLastClick >= WAIT_TIME / 2f && elapsedSinceLastClick <= WAIT_TIME) {
-            if (enemyLastAtk == null) {
-                enemyLastAtk = encounter.boss.randomizeAtk();
-                enemyLastAtk.randomizeHitKill();
-                enemyLastAtk.setIsOver(false);
-                Vector2 alvo = instances.playerCombatForm.getCenter();
-                enemyLastAtk.centerOn(alvo.x, alvo.y);
-
-                instances.playerCombatForm.setHealthPoints(instances.playerCombatForm.getHealthPoints() - enemyLastAtk.getDamage());
-                instances.playerCombatFormHpText.setMessage("HP: " + instances.playerCombatForm.getHealthPoints());
-                encounter.boss.setState(AnimState.ATTACK);
-                instances.playerCombatForm.setState(AnimState.HURT);
-            }
-
-            if (!enemyLastAtk.getIsOver()) {
-                enemyLastAtk.update(delta);
-            }
-        }
-
-        encounter.boss.update(delta);
-        instances.playerCombatForm.update(delta);
-
-        return false;
     }
 
     @Override
     protected void draw(float delta) {
-        instances.secretEyeButton.draw(batch);
+        CombatEncounter encounter = controller.getEncounter();
 
-        batch.draw(instances.battleScreen, 0, 0);
+        instances.combat.secretEyeButton.draw(batch);
+
+        batch.draw(instances.combat.battleScreen, 0, 0);
 
         batch.draw(encounter.boss.getImage(), encounter.boss.getPosition().x, encounter.boss.getPosition().y);
-        batch.draw(instances.playerCombatForm.getImage(), instances.playerCombatForm.getPosition().x, instances.playerCombatForm.getPosition().y);
+        batch.draw(instances.combat.playerCombatForm.getImage(), instances.combat.playerCombatForm.getPosition().x, instances.combat.playerCombatForm.getPosition().y);
 
         batch.setColor(GameConstants.black);
         batch.draw(assets.whitePixel(), 0, GameConstants.SCREEN_HEIGHT * 0.75f,
                 GameConstants.SCREEN_WIDTH, GameConstants.SCREEN_HEIGHT * 0.25f);
 
         float bossHpWidth = (encounter.boss.getHealthPoints() / (float) encounter.maxHp) * GameConstants.bossHpBarMaxWidth;
-        float playerHpWidth = (instances.playerCombatForm.getHealthPoints() / (float) GameConstants.playerHp) * GameConstants.playerHpBarMaxWidth;
-        float playerManaWidth = (instances.playerCombatForm.getManaPoints() / (float) GameConstants.playerMana) * GameConstants.playerManaBarMaxWidth;
+        float playerHpWidth = (instances.combat.playerCombatForm.getHealthPoints() / (float) GameConstants.playerHp) * GameConstants.playerHpBarMaxWidth;
+        float playerManaWidth = (instances.combat.playerCombatForm.getManaPoints() / (float) GameConstants.playerMana) * GameConstants.playerManaBarMaxWidth;
 
         batch.setColor(GameConstants.red);
         batch.draw(assets.whitePixel(), GameConstants.SCREEN_WIDTH * 0.035f, GameConstants.SCREEN_HEIGHT * 0.86f,
@@ -201,24 +92,25 @@ public class CombatScreen extends BaseScreen {
         batch.setColor(Color.WHITE);
 
         encounter.bossHpText.draw(batch, GameConstants.SCREEN_WIDTH * 0.035f, GameConstants.SCREEN_HEIGHT * 0.9f);
-        instances.playerCombatFormHpText.draw(batch, GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.83f);
-        instances.playerCombatFormManaText.draw(batch, GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.92f);
+        instances.combat.playerCombatFormHpText.draw(batch, GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.83f);
+        instances.combat.playerCombatFormManaText.draw(batch, GameConstants.SCREEN_WIDTH * 0.82f, GameConstants.SCREEN_HEIGHT * 0.92f);
 
-        instances.azuringButton.draw(batch);
-        instances.vortexButton.draw(batch);
-        instances.nebulaButton.draw(batch);
-        instances.razorButton.draw(batch);
+        instances.combat.azuringButton.draw(batch);
+        instances.combat.vortexButton.draw(batch);
+        instances.combat.nebulaButton.draw(batch);
+        instances.combat.razorButton.draw(batch);
 
-        if (usedFuryOfTheEye && !instances.furyOfTheEye.getIsOver()) {
-            batch.draw(instances.furyOfTheEye.getImage(), instances.furyOfTheEye.getPosition().x, instances.furyOfTheEye.getPosition().y);
+        if (controller.isUsedFuryOfTheEye() && !instances.combat.furyOfTheEye.getIsOver()) {
+            batch.draw(instances.combat.furyOfTheEye.getImage(), instances.combat.furyOfTheEye.getPosition().x, instances.combat.furyOfTheEye.getPosition().y);
         }
 
+        PlayerAttack playerLastAtk = controller.getPlayerLastAtk();
         if (playerLastAtk != null && !playerLastAtk.getIsOver()) {
             batch.draw(playerLastAtk.getImage(), playerLastAtk.getPosition().x, playerLastAtk.getPosition().y);
         }
 
-        if (turnoAtual == Turn.ENEMY && elapsedSinceLastClick >= WAIT_TIME / 2f && elapsedSinceLastClick <= WAIT_TIME
-                && enemyLastAtk != null && !enemyLastAtk.getIsOver()) {
+        BossAttack enemyLastAtk = controller.getEnemyLastAtk();
+        if (controller.isEnemyAttackWindowActive() && enemyLastAtk != null && !enemyLastAtk.getIsOver()) {
             batch.draw(enemyLastAtk.getImage(), enemyLastAtk.getPosition().x, enemyLastAtk.getPosition().y);
         }
     }

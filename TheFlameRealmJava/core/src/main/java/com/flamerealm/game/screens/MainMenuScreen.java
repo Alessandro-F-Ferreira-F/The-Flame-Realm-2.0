@@ -1,6 +1,5 @@
 package com.flamerealm.game.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.flamerealm.game.FlameRealmGame;
 
 /**
@@ -14,31 +13,16 @@ public class MainMenuScreen extends BaseScreen {
 
     @Override
     protected boolean handleInput() {
-        if (!Gdx.input.justTouched()) {
-            return false;
-        }
-        if (instances.quitButton.mouseInButton()) {
-            Gdx.app.exit();
-            return true;
-        } else if (instances.playButton.mouseInButton()) {
-            game.setScreen(game.play);
-            return true;
-        } else if (instances.historyButton.mouseInButton()) {
-            game.setScreen(game.history);
-            return true;
-        } else if (instances.tutorialButton.mouseInButton()) {
-            game.setScreen(game.tutorial);
-            return true;
-        }
-        return false;
+        return clickFirst(instances.menu.quitButton, instances.menu.playButton,
+                instances.menu.historyButton, instances.menu.tutorialButton);
     }
 
     @Override
     protected void draw(float delta) {
-        batch.draw(instances.mainMenuScreen, 0, 0);
-        instances.playButton.draw(batch);
-        instances.historyButton.draw(batch);
-        instances.tutorialButton.draw(batch);
-        instances.quitButton.draw(batch);
+        batch.draw(instances.menu.mainMenuScreen, 0, 0);
+        instances.menu.playButton.draw(batch);
+        instances.menu.historyButton.draw(batch);
+        instances.menu.tutorialButton.draw(batch);
+        instances.menu.quitButton.draw(batch);
     }
 }

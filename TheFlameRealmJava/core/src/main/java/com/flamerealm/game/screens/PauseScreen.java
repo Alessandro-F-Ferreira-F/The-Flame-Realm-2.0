@@ -1,6 +1,5 @@
 package com.flamerealm.game.screens;
 
-import com.badlogic.gdx.Gdx;
 import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.GameConstants;
 import com.flamerealm.game.ui.TextAlign;
@@ -16,24 +15,13 @@ public class PauseScreen extends BaseScreen {
 
     @Override
     protected boolean handleInput() {
-        if (!Gdx.input.justTouched()) {
-            return false;
-        }
-        if (instances.returnToMainMenuButton.mouseInButton()) {
-            game.setScreen(game.mainMenu);
-            return true;
-        }
-        if (instances.returnToGameButton.mouseInButton()) {
-            game.setScreen(game.play);
-            return true;
-        }
-        return false;
+        return clickFirst(instances.nav.returnToMainMenuButton, instances.nav.returnToGameButton);
     }
 
     @Override
     protected void draw(float delta) {
-        instances.pauseText.draw(batch, TextAlign.CENTER, 0, 0, GameConstants.SCREEN_WIDTH, GameConstants.SCREEN_HEIGHT);
-        instances.returnToMainMenuButton.draw(batch);
-        instances.returnToGameButton.draw(batch);
+        instances.overlays.pauseText.draw(batch, TextAlign.CENTER, 0, 0, GameConstants.SCREEN_WIDTH, GameConstants.SCREEN_HEIGHT);
+        instances.nav.returnToMainMenuButton.draw(batch);
+        instances.nav.returnToGameButton.draw(batch);
     }
 }

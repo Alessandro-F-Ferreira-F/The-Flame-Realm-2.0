@@ -65,6 +65,17 @@ public class FlameRealmGame extends Game {
         death = new DeathScreen(this);
         loading = new LoadingScreen(this); // singleton reaproveitado (Fase 1)
 
+        // Command dos botoes de navegacao: ligados uma unica vez aqui, pois os
+        // botoes sao objetos compartilhados entre telas e as acoes referenciam
+        // as telas singleton que acabaram de ser criadas.
+        instances.nav.returnToMainMenuButton.setAction(() -> { setScreen(mainMenu); return true; });
+        instances.nav.returnToGameButton.setAction(()   -> { setScreen(play);     return true; });
+        instances.nav.pauseButton.setAction(()          -> { setScreen(pause);    return true; });
+        instances.menu.playButton.setAction(()          -> { setScreen(play);     return true; });
+        instances.menu.historyButton.setAction(()       -> { setScreen(history);  return true; });
+        instances.menu.tutorialButton.setAction(()      -> { setScreen(tutorial); return true; });
+        instances.menu.quitButton.setAction(()          -> { Gdx.app.exit();      return true; });
+
         setScreen(mainMenu);
     }
 

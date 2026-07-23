@@ -1,11 +1,13 @@
 package com.flamerealm.game.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.flamerealm.game.Assets;
 import com.flamerealm.game.FlameRealmGame;
 import com.flamerealm.game.instances.GameInstances;
+import com.flamerealm.game.ui.GameButton;
 
 public abstract class BaseScreen implements Screen {
     protected final FlameRealmGame game;
@@ -55,6 +57,23 @@ public abstract class BaseScreen implements Screen {
 
     /** Passo variavel: desenha o conteudo, entre batch.begin() e batch.end(). */
     protected abstract void draw(float delta);
+
+    /**
+     * Dispara o Command do primeiro botao sob o mouse num clique (ver
+     * GameButton.setAction/fire). Usado pelos handleInput() de navegacao.
+     * @return true se algum botao disparou e trocou de tela.
+     */
+    protected boolean clickFirst(GameButton... buttons) {
+        if (!Gdx.input.justTouched()) {
+            return false;
+        }
+        for (GameButton b : buttons) {
+            if (b.mouseInButton()) {
+                return b.fire();
+            }
+        }
+        return false;
+    }
 
     // Hooks de ciclo de vida (vazios; subclasses sobrescrevem so o que precisam)
     @Override public void show() {}
