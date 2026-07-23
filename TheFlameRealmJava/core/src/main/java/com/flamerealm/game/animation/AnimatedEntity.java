@@ -1,6 +1,8 @@
 package com.flamerealm.game.animation;
 
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
@@ -19,6 +21,7 @@ public class AnimatedEntity {
     protected int qtdFrames;
     protected Texture spriteSheet;
     protected GridPoint2 pixels;
+    protected GridPoint2 sheetOffset;
     protected float offsetFrames;
 
     protected float atual;
@@ -42,6 +45,7 @@ public class AnimatedEntity {
         this.spriteSheet = spriteSheet;
         this.qtdFrames = qtdFrames;
         this.pixels = pixels;
+        this.sheetOffset = sheetOffset;
         this.offsetFrames = offsetFrames;
 
         this.frame = new TextureRegion[qtdFrames];
@@ -95,6 +99,56 @@ public class AnimatedEntity {
 
     public void setPosition(Vector2 pos) {
         position = pos;
+    }
+
+    /**
+     * Centro da regiao de pixels nao transparentes, como offset a partir do canto
+     * superior-esquerdo do sprite. Une a bounding box de todos os frames (para o
+     * ponto nao "pular" entre frames) e ja converte para o espaco de desenho,
+     * compensando o flip vertical da camera yDown (ver reinitialize/flip).
+     *
+     * <p>Serve para ancorar efeitos (ex.: ataques) no centro visual do personagem,
+     * em vez do centro geometrico do frame, que inclui o padding transparente.
+     * Le um Pixmap fresco da sheet via TextureData (a textura ja subiu para a GPU,
+     * entao consumePixmap recarrega do arquivo) - operacao pontual, nao por frame.
+     * Fallback: centro do frame, se tudo for transparente.
+     *
+     * @param alphaThreshold alpha (0-255) minimo para um pixel contar como opaco.
+     */
+    public Vector2 opaqueCenterOffset(int alphaThreshold) {
+        TextureData data = spriteSheet.getTextureData();
+        if (!data.isPrepared()) {
+            data.prepare();
+        }
+        Pixmap pm = data.consumePixmap();
+        try {
+            int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = -1, maxY = -1;
+            for (int f = 0; f < qtdFrames; f++) {
+                int baseX = sheetOffset.x + pixels.x * f;
+                for (int y = 0; y < pixels.y; y++) {
+                    for (int x = 0; x < pixels.x; x++) {
+                        int alpha = pm.getPixel(baseX + x, sheetOffset.y + y) & 0xFF;
+                        if (alpha > alphaThreshold) {
+                            if (x < minX) minX = x;
+                            if (x > maxX) maxX = x;
+                            if (y < minY) minY = y;
+                            if (y > maxY) maxY = y;
+                        }
+                    }
+                }
+            }
+            if (maxX < 0) {
+                return new Vector2(pixels.x / 2f, pixels.y / 2f);
+            }
+            // Mapeamento direto: o flip(false, true) dos frames apenas cancela a
+            // camera yDown, deixando o sprite em pe. Logo a linha 0 do pixmap cru
+            // (topo do personagem) cai no topo da regiao na tela - sem inverter Y.
+            return new Vector2((minX + maxX) / 2f, (minY + maxY) / 2f);
+        } finally {
+            if (data.disposePixmap()) {
+                pm.dispose();
+            }
+        }
     }
 
     public void centerOn(float cx, float cy) {

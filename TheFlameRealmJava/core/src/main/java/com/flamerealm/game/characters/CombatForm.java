@@ -23,12 +23,17 @@ import java.util.Map;
  * quando o combatente nao tem clipe para o estado pedido.
  */
 public class CombatForm<T extends Attack> {
+    /** Alpha (0-255) minimo para um pixel contar como opaco ao achar o centro visual. */
+    private static final int OPAQUE_ALPHA_THRESHOLD = 10;
+
     private final Vector2 position;
     private final Map<AnimState, AnimatedEntity> clips;
     private AnimState currentState = AnimState.IDLE;
     private float progress = 0f;
     private int healthPoints;
     private List<T> atkList;
+    /** Offset do centro dos pixels opacos do clipe IDLE; calculado uma vez sob demanda. */
+    private Vector2 idleOpaqueCenterOffset;
 
     public CombatForm(Vector2 position, Map<AnimState, AnimatedEntity> clips, int healthPoints, List<T> atkList) {
         if (!clips.containsKey(AnimState.IDLE)) {
@@ -89,11 +94,19 @@ public class CombatForm<T extends Attack> {
         return position;
     }
 
+    /**
+     * Centro visual do combatente (miolo de pixels opacos do clipe IDLE), e nao o
+     * centro geometrico do frame - que, por conta do padding transparente do
+     * sprite centralizado, deixava os ataques deslocados. Ancorado no IDLE porque
+     * o alvo so leva golpe nesse estado. Calculado uma vez e cacheado.
+     */
     public Vector2 getCenter() {
-        TextureRegion img = getImage();
+        if (idleOpaqueCenterOffset == null) {
+            idleOpaqueCenterOffset = clips.get(AnimState.IDLE).opaqueCenterOffset(OPAQUE_ALPHA_THRESHOLD);
+        }
         return new Vector2(
-                position.x + img.getRegionWidth() / 2f,
-                position.y + img.getRegionHeight() / 2f);
+                position.x + idleOpaqueCenterOffset.x,
+                position.y + idleOpaqueCenterOffset.y);
     }
 
     public T randomizeAtk() {
